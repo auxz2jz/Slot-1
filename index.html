@@ -1,37 +1,30 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#111" />
-  <link rel="manifest" href="manifest.json" />
-  <title>Relic of Emberwood</title>
-  <style>
-    html,body{margin:0;background:#111;color:#eee;font-family:system-ui,sans-serif;touch-action:none;overscroll-behavior:none;height:100%}
-    body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
-    #wrap{width:min(96vw,640px)}
-    canvas{width:100%;aspect-ratio:256/240;image-rendering:pixelated;background:#000;border:3px solid #444;border-radius:8px;display:block}
-    #hud{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin:4px 2px}
-    #controls{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;user-select:none;-webkit-user-select:none}
-    #stick{width:156px;height:156px;border-radius:50%;background:#292929;position:relative;box-shadow:inset 0 0 0 3px #444;touch-action:none}
-    #stick:before,#stick:after{content:"";position:absolute;background:#3d3d3d;opacity:.8}
-    #stick:before{width:4px;height:120px;left:76px;top:18px}
-    #stick:after{height:4px;width:120px;left:18px;top:76px}
-    #knob{width:64px;height:64px;border-radius:50%;background:#555;position:absolute;left:46px;top:46px;box-shadow:inset 0 -5px #333;pointer-events:none}
-    button{border:0;border-radius:14px;background:#333;color:#fff;font-weight:800;font-size:22px;box-shadow:inset 0 -4px #222;touch-action:none}
-    button:active,.held{transform:translateY(2px);box-shadow:inset 0 -2px #111;background:#555}
-    .actions{display:flex;gap:16px;align-items:center}.actions button{width:76px;height:76px;border-radius:50%;background:#7d2a2a}.actions .b{background:#3a3a7d}
-    #start{font-size:12px;padding:9px 16px;border-radius:20px;background:#444}
-    .centerControls{display:flex;flex-direction:column;gap:10px;align-items:center}
-    .help{font-size:12px;opacity:.75;text-align:center}
-    @media(max-width:470px){
-      #stick{width:132px;height:132px}
-      #knob{left:34px;top:34px}
-      #stick:before{height:100px;left:64px;top:16px}
-      #stick:after{width:100px;left:16px;top:64px}
-      .actions{gap:10px}.actions button{width:66px;height:66px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="theme-color" content="#111" />
+<link rel="manifest" href="manifest.json" />
+<title>Relic of Emberwood</title>
+<style>
+html,body{margin:0;background:#111;color:#eee;font-family:system-ui,sans-serif;touch-action:none;overscroll-behavior:none;height:100%}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+#wrap{width:min(96vw,640px)}
+canvas{width:100%;aspect-ratio:256/240;image-rendering:pixelated;background:#000;border:3px solid #444;border-radius:8px;display:block}
+#hud{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:4px 2px;gap:8px}
+#controls{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;user-select:none;-webkit-user-select:none}
+#stick{width:156px;height:156px;border-radius:50%;background:#292929;position:relative;box-shadow:inset 0 0 0 3px #444;touch-action:none}
+#stick:before,#stick:after{content:"";position:absolute;background:#3d3d3d;opacity:.8}
+#stick:before{width:4px;height:120px;left:76px;top:18px}
+#stick:after{height:4px;width:120px;left:18px;top:76px}
+#knob{width:64px;height:64px;border-radius:50%;background:#555;position:absolute;left:46px;top:46px;box-shadow:inset 0 -5px #333;pointer-events:none}
+button{border:0;border-radius:14px;background:#333;color:#fff;font-weight:800;font-size:22px;box-shadow:inset 0 -4px #222;touch-action:none}
+button:active,.held{transform:translateY(2px);box-shadow:inset 0 -2px #111;background:#555}
+.actions{display:flex;gap:16px;align-items:center}.actions button{width:76px;height:76px;border-radius:50%;background:#7d2a2a}.actions .b{background:#3a3a7d}
+#start{font-size:12px;padding:9px 16px;border-radius:20px;background:#444}.centerControls{display:flex;flex-direction:column;gap:10px;align-items:center}
+.help{font-size:12px;opacity:.78;text-align:center}
+@media(max-width:470px){#stick{width:132px;height:132px}#knob{left:34px;top:34px}#stick:before{height:100px;left:64px;top:16px}#stick:after{width:100px;left:16px;top:64px}.actions{gap:10px}.actions button{width:66px;height:66px}}
+</style>
 </head>
 <body>
 <div id="wrap">
@@ -42,413 +35,88 @@
     <div class="centerControls"><button id="start">RESET</button></div>
     <div class="actions"><button class="b" data-k="KeyB">B</button><button data-k="Space">A</button></div>
   </div>
-  <div class="help">Move: 360° stick / arrows · A: sword · B: search/interact · TEST BUILD: flashing ! marks hidden entrances.</div>
+  <div class="help">Move: 360° stick · A: sword · B: place bomb · Push marked stones for ~2 seconds · Keys unlock doors automatically.</div>
 </div>
 <script>
 const c=document.getElementById('game'),g=c.getContext('2d');g.imageSmoothingEnabled=false;
-const keys=new Set();
-const roomEl=document.getElementById('room'),statusEl=document.getElementById('status');
-for(const b of document.querySelectorAll('[data-k]')){
-  const k=b.dataset.k;
-  const on=e=>{e.preventDefault();keys.add(k);b.classList.add('held')};
-  const off=e=>{e.preventDefault();keys.delete(k);b.classList.remove('held')};
-  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off);
-}
-addEventListener('keydown',e=>keys.add(e.code));
-addEventListener('keyup',e=>keys.delete(e.code));
-document.getElementById('start').onclick=reset;
+const keys=new Set(),roomEl=document.getElementById('room'),statusEl=document.getElementById('status');
+for(const b of document.querySelectorAll('[data-k]')){const k=b.dataset.k;const on=e=>{e.preventDefault();keys.add(k);b.classList.add('held')};const off=e=>{e.preventDefault();keys.delete(k);b.classList.remove('held')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off)}
+addEventListener('keydown',e=>keys.add(e.code));addEventListener('keyup',e=>keys.delete(e.code));document.getElementById('start').onclick=reset;
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');let joyX=0,joyY=0,stickPointer=null;
+function setStickFromEvent(e){const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const radius=r.width*.34,mag=Math.hypot(dx,dy);if(mag>radius){dx=dx/mag*radius;dy=dy/mag*radius}joyX=dx/radius;joyY=dy/radius;knob.style.transform=`translate(${dx}px,${dy}px)`}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);setStickFromEvent(e)});stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)setStickFromEvent(e)});function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;joyX=joyY=0;knob.style.transform='translate(0px,0px)'}stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);
 
-const stick=document.getElementById('stick'),knob=document.getElementById('knob');
-let joyX=0,joyY=0,stickPointer=null;
-function setStickFromEvent(e){
-  const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-  let dx=e.clientX-cx,dy=e.clientY-cy;
-  const radius=r.width*.34,mag=Math.hypot(dx,dy);
-  if(mag>radius){dx=dx/mag*radius;dy=dy/mag*radius;}
-  joyX=dx/radius;joyY=dy/radius;knob.style.transform=`translate(${dx}px,${dy}px)`;
-}
-stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);setStickFromEvent(e)});
-stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)setStickFromEvent(e)});
-function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;joyX=joyY=0;knob.style.transform='translate(0px,0px)'}
-stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);
-
-const TILE=16,W=16,H=15,MAX_HEARTS=3;
+const TILE=16,W=16,H=15,MAX_HEARTS=3,DEBUG_SHOW_SECRETS=true;
 const rooms=[
-[
-'################',
-'#..E........E..#',
-'#..##..........#',
-'#..##......E...#',
-'#..............#',
-'#......####....#',
-'#..E...........#',
-'#..............>',
-'#...Q..........#',
-'#..............#',
-'#.........##...#',
-'#.........##...#',
-'#.....E........#',
-'#..............#',
-'#######v########'],
-[
-'################',
-'#....E.........#',
-'#.....#####....#',
-'#.........#..E.#',
-'#..E......#....#',
-'#.........#....#',
-'#.........#....#',
-'<..............#',
-'#.........#....#',
-'#....######....#',
-'#...........E..#',
-'#..............#',
-'#...E..........#',
-'#..............#',
-'#######v########'],
-[
-'#######^########',
-'#..E...........#',
-'#..######......#',
-'#........E.....#',
-'#...........E..#',
-'#..............#',
-'#......####....#',
-'#......#.......>',
-'#..E...#.......#',
-'#......#.......#',
-'#......####....#',
-'#..........E...#',
-'#..............#',
-'#..............#',
-'################'],
-[
-'#######^########',
-'#.....E........#',
-'#....E.........#',
-'#..............#',
-'#....######....#',
-'#...........E..#',
-'#..............#',
-'<..............#',
-'#......#.......#',
-'#..............#',
-'#....######....#',
-'#..E...........#',
-'#..........Q...#',
-'#......E.......#',
-'################'],
-[
-'################',
-'#..............#',
-'#..E.......E...#',
-'#..............#',
-'#....######....#',
-'#....#....#....#',
-'#.E..#....#..E.#',
-'#....#....#....#',
-'#....######....#',
-'#..............#',
-'#.......E......#',
-'#..............#',
-'#......O.......#',
-'#..............#',
-'################'],
-[
-'################',
-'#...E......E...#',
-'#..............#',
-'#....######....#',
-'#..............#',
-'#.E..........E.#',
-'#..............#',
-'#......##......#',
-'#......##......#',
-'#..............#',
-'#...E......E...#',
-'#..............#',
-'#......O.......#',
-'#..............#',
-'################']
+['################','#..E........E..#','#..##..........#','#..##......E...#','#..............#','#......####....#','#..E...........#','#..............>','#...X..........#','#..............#','#.........##...#','#.........##...#','#.....E........#','#..............#','#######v########'],
+['################','#....E.........#','#.....#####....#','#.........#..E.#','#..E......#....#','#....###D###...#','#.........#....#','<..............#','#.........#....#','#....######....#','#...........E..#','#..............#','#...E..........#','#..............#','#######v########'],
+['#######^########','#..E...........#','#..######......#','#........E.....#','#...........E..#','#..............#','#......####....#','#......#.......>','#..E...#.......#','#......#.......#','#......####....#','#..........E...#','#..............#','#..............#','################'],
+['#######^########','#.....E........#','#....E.........#','#..............#','#....######....#','#...........E..#','#..............#','<..............#','#......#.......#','#..............#','#....######....#','#..E...........#','#..........P...#','#......E.......#','################'],
+['################','#..............#','#..E.......E...#','#..............#','#....######....#','#....#....#....#','#.E..#....#..E.#','#....#....#....#','#....######....#','#..............#','#.......E......#','#..............#','#......O.......#','#..............#','################'],
+['################','#...E......E...#','#..............#','#....######....#','#..............#','#.E..........E.#','#..............#','#......##......#','#......##......#','#..............#','#...E......E...#','#..............#','#......O.......#','#..............#','################'],
+['################','#..............#','#....E....E....#','#..............#','#..##########..#','#..............#','#.....E........#','#..............#','#..............#','#..##########..#','#...........E..#','#..............#','#......O.......#','#..............#','################']
 ];
-const roomNames=['Emberwood Meadow','Old Stone Road','South Grove','Ruined Court','Hidden Crypt','Forgotten Vault'];
+const roomNames=['Emberwood Meadow','Old Stone Road','South Grove','Ruined Court','Hidden Crypt','Forgotten Vault','Locked Treasury'];
 const links={'0,R':1,'1,L':0,'0,D':2,'2,U':0,'1,D':3,'3,U':1,'2,R':3,'3,L':2};
-const DEBUG_SHOW_SECRETS=true; // TEMPORARY TEST MARKERS — set false/remove later
-const secretPortals={
-  '0:4:8':{target:4,x:120,y:176,returnRoom:0,returnX:80,returnY:144},
-  '3:11:12':{target:5,x:120,y:176,returnRoom:3,returnX:176,returnY:192}
-};
-const secretReturns={
-  '4:7:12':{target:0,x:80,y:144},
-  '5:7:12':{target:3,x:176,y:192}
-};
+const secretPortals={'0:4:8':{target:4,x:120,y:176,type:'bomb'},'3:11:12':{target:5,x:120,y:176,type:'push'}};
+const secretReturns={'4:7:12':{target:0,x:80,y:144},'5:7:12':{target:3,x:176,y:192},'6:7:12':{target:1,x:128,y:112}};
+const doorPortals={'1:8:5':{target:6,x:120,y:176}};
 const rewardRooms=new Set([2,4,5]);
-let room,px,py,dirAngle,hearts,shards,roomState,won,interactLatch,attackLatch,invuln;
-let attackFrame,attackCooldown,attackId,attackHits,enemyIdCounter,projectiles,drops,openedSecrets,message,messageTimer,walkTick;
-
-function reset(){
-  room=0;px=40;py=112;dirAngle=Math.PI/2;hearts=MAX_HEARTS;shards=0;won=false;interactLatch=false;attackLatch=false;invuln=0;
-  attackFrame=0;attackCooldown=0;attackId=0;attackHits=new Set();enemyIdCounter=1;projectiles=[];drops=[];openedSecrets=new Set();message='';messageTimer=0;walkTick=0;
-  roomState=rooms.map(()=>({enemies:[],shard:false,taken:false}));
-  rooms.forEach((m,ri)=>m.forEach((r,y)=>[...r].forEach((ch,x)=>{
-    if(ch==='E')roomState[ri].enemies.push(makeEnemy(x*TILE+2,y*TILE+2,ri));
-  })));
-}
-function makeEnemy(x,y,ri){
-  return{id:enemyIdCounter++,x,y,hp:2,dir:Math.floor(Math.random()*4),timer:20+Math.floor(Math.random()*90),pause:Math.random()<.2?20:0,flash:0,speed:.38+Math.random()*.18,room:ri};
-}
+let room,px,py,dirAngle,hearts,shards,bombs,keyCount,roomState,won,attackLatch,bombLatch,invuln;
+let attackFrame,attackCooldown,attackHits,enemyIdCounter,projectiles,drops,openedSecrets,unlockedDoors,activeBombs,explosions,message,messageTimer,walkTick,pushState;
+function reset(){room=0;px=40;py=112;dirAngle=Math.PI/2;hearts=MAX_HEARTS;shards=0;bombs=0;keyCount=0;won=false;attackLatch=false;bombLatch=false;invuln=0;attackFrame=0;attackCooldown=0;attackHits=new Set();enemyIdCounter=1;projectiles=[];drops=[];openedSecrets=new Set();unlockedDoors=new Set();activeBombs=[];explosions=[];message='';messageTimer=0;walkTick=0;pushState={key:'',frames:0};roomState=rooms.map(()=>({enemies:[],shard:false,taken:false,keySpawned:false,stones:[]}));rooms.forEach((m,ri)=>m.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch==='E')roomState[ri].enemies.push(makeEnemy(x*TILE+2,y*TILE+2,ri));if(ch==='P')roomState[ri].stones.push({x,y,source:`${ri}:${x}:${y}`})})));if(roomState[0].enemies[0])roomState[0].enemies[0].guaranteedDrop='bomb'}
+function makeEnemy(x,y,ri){return{id:enemyIdCounter++,x,y,hp:2,dir:Math.floor(Math.random()*4),timer:25+Math.floor(Math.random()*100),pause:0,flash:0,speed:.35+Math.random()*.16,room:ri,guaranteedDrop:null}}
 reset();
-
-function tileAt(x,y){
-  const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE);
-  if(tx<0||ty<0||tx>=W||ty>=H)return '#';
-  return rooms[room][ty][tx];
-}
-function secretKeyForTile(tx,ty){return `${room}:${tx}:${ty}`;}
-function solidAt(x,y){
-  const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE),ch=tileAt(x,y);
-  if(ch==='#')return true;
-  if(ch==='Q'&&!openedSecrets.has(secretKeyForTile(tx,ty)))return true;
-  return false;
-}
-function canMove(nx,ny){
-  return !solidAt(nx+4,ny+4)&&!solidAt(nx+11,ny+4)&&!solidAt(nx+4,ny+11)&&!solidAt(nx+11,ny+11);
-}
-function canEnemyMove(e,nx,ny){
-  return !solidAt(nx+2,ny+2)&&!solidAt(nx+11,ny+2)&&!solidAt(nx+2,ny+13)&&!solidAt(nx+11,ny+13);
-}
-function changeRoom(edge){
-  const n=links[room+','+edge];if(n==null)return false;
-  room=n;projectiles=[];drops=[];
-  if(edge==='R'){px=6;py=7*TILE;}
-  if(edge==='L'){px=234;py=7*TILE;}
-  if(edge==='D'){py=6;px=7*TILE;}
-  if(edge==='U'){py=218;px=7*TILE;}
-  return true;
-}
-function showMessage(text){message=text;messageTimer=120;}
-function checkSpecialTile(){
-  const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE),key=`${room}:${tx}:${ty}`;
-  const secret=secretPortals[key];
-  if(secret&&openedSecrets.has(key)){
-    room=secret.target;px=secret.x;py=secret.y;projectiles=[];drops=[];showMessage('You found a hidden chamber.');return;
-  }
-  const ret=secretReturns[key];
-  if(ret){room=ret.target;px=ret.x;py=ret.y;projectiles=[];drops=[];showMessage('Back to the surface.');}
-}
-function pointSegmentDist(px0,py0,x1,y1,x2,y2){
-  const vx=x2-x1,vy=y2-y1,wx=px0-x1,wy=py0-y1,c1=vx*wx+vy*wy,c2=vx*vx+vy*vy;
-  let t=c2?c1/c2:0;t=Math.max(0,Math.min(1,t));
-  return Math.hypot(px0-(x1+t*vx),py0-(y1+t*vy));
-}
-function swordGeometry(){
-  if(attackFrame<=0)return null;
-  const total=16,progress=(total-attackFrame)/total;
-  const reach=9+17*Math.sin(Math.PI*progress);
-  const cx=px+8,cy=py+8;
-  return{cx,cy,sx:cx+Math.cos(dirAngle)*7,sy:cy+Math.sin(dirAngle)*7,ex:cx+Math.cos(dirAngle)*reach,ey:cy+Math.sin(dirAngle)*reach,reach};
-}
-function startAttack(){
-  attackFrame=16;attackCooldown=7;attackId++;attackHits.clear();
-  if(hearts===MAX_HEARTS){
-    projectiles.push({x:px+8+Math.cos(dirAngle)*20,y:py+8+Math.sin(dirAngle)*20,vx:Math.cos(dirAngle)*2.5,vy:Math.sin(dirAngle)*2.5,life:70});
-  }
-}
-function knockEnemy(e,ang,dist){
-  for(let i=0;i<dist;i++){
-    const nx=e.x+Math.cos(ang),ny=e.y+Math.sin(ang);
-    if(!canEnemyMove(e,nx,ny))break;e.x=nx;e.y=ny;
-  }
-}
-function damagePlayer(e){
-  if(invuln>0)return;
-  hearts--;invuln=70;
-  const ang=Math.atan2((py+8)-(e.y+7),(px+8)-(e.x+6));
-  for(let i=0;i<10;i++){
-    const nx=px+Math.cos(ang),ny=py+Math.sin(ang);
-    if(!canMove(nx,ny))break;px=nx;py=ny;
-  }
-  if(hearts<=0)reset();
-}
-function maybeDropHeart(e){
-  if(Math.random()<.28)drops.push({room,x:e.x+6,y:e.y+7,type:'heart',life:900});
-}
-function chooseEnemyDir(e){
-  e.dir=Math.floor(Math.random()*4);e.timer=35+Math.floor(Math.random()*110);e.pause=Math.random()<.25?18+Math.floor(Math.random()*35):0;
-}
-function updateEnemies(){
-  const dirs=[[1,0],[0,1],[-1,0],[0,-1]];
-  for(const e of roomState[room].enemies){
-    if(e.hp<=0)continue;
-    if(e.flash>0)e.flash--;
-    if(e.pause>0){e.pause--;continue;}
-    e.timer--;if(e.timer<=0)chooseEnemyDir(e);
-    const [dx,dy]=dirs[e.dir],nx=e.x+dx*e.speed,ny=e.y+dy*e.speed;
-    if(canEnemyMove(e,nx,ny)){e.x=nx;e.y=ny;}
-    else chooseEnemyDir(e);
-  }
-}
-function updateProjectiles(){
-  for(const p of projectiles){
-    if(p.life<=0)continue;
-    p.x+=p.vx;p.y+=p.vy;p.life--;
-    if(solidAt(p.x,p.y)){p.life=0;continue;}
-    for(const e of roomState[room].enemies){
-      if(e.hp<=0)continue;
-      if(Math.hypot(p.x-(e.x+6),p.y-(e.y+7))<9){
-        e.hp--;e.flash=8;p.life=0;knockEnemy(e,Math.atan2(p.vy,p.vx),5);if(e.hp<=0)maybeDropHeart(e);break;
-      }
-    }
-  }
-  projectiles=projectiles.filter(p=>p.life>0);
-}
-function updateDrops(){
-  for(const d of drops)d.life--;
-  drops=drops.filter(d=>d.life>0);
-  for(const d of drops){
-    if(d.room===room&&Math.hypot((px+8)-d.x,(py+8)-d.y)<11){
-      if(d.type==='heart'&&hearts<MAX_HEARTS)hearts++;
-      d.life=0;
-    }
-  }
-}
-function update(){
-  if(messageTimer>0)messageTimer--;
-  if(won)return;
-  if(invuln>0)invuln--;if(attackCooldown>0)attackCooldown--;
-
-  let dx=joyX,dy=joyY;
-  if(keys.has('ArrowLeft')||keys.has('KeyA'))dx-=1;
-  if(keys.has('ArrowRight')||keys.has('KeyD'))dx+=1;
-  if(keys.has('ArrowUp')||keys.has('KeyW'))dy-=1;
-  if(keys.has('ArrowDown')||keys.has('KeyS'))dy+=1;
-  const mag=Math.hypot(dx,dy);
-  if(mag>.08){
-    const nx=dx/Math.max(1,mag),ny=dy/Math.max(1,mag),speed=attackFrame>0?.55:1.45;
-    dx=nx*speed;dy=ny*speed;dirAngle=Math.atan2(dy,dx);walkTick++;
-    if(canMove(px+dx,py))px+=dx;
-    if(canMove(px,py+dy))py+=dy;
-  }
-
-  if(px<0&&!changeRoom('L'))px=0;
-  if(px>240&&!changeRoom('R'))px=240;
-  if(py<0&&!changeRoom('U'))py=0;
-  if(py>224&&!changeRoom('D'))py=224;
-  checkSpecialTile();
-
-  const attackPressed=keys.has('Space')||keys.has('Enter');
-  if(attackPressed&&!attackLatch&&attackFrame<=0&&attackCooldown<=0)startAttack();
-  attackLatch=attackPressed;
-
-  const interact=keys.has('KeyB')||keys.has('ShiftLeft')||keys.has('ShiftRight');
-  if(interact&&!interactLatch){
-    const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE);
-    const around=[[tx,ty],[tx+1,ty],[tx-1,ty],[tx,ty+1],[tx,ty-1]];
-    let found=false;
-    for(const [x,y] of around){
-      const key=`${room}:${x}:${y}`;
-      if(secretPortals[key]&&!openedSecrets.has(key)){openedSecrets.add(key);showMessage('A hidden passage opens!');found=true;break;}
-    }
-    if(!found)showMessage('Nothing unusual here.');
-  }
-  interactLatch=interact;
-
-  updateEnemies();
-  const sg=swordGeometry();
-  if(sg&&attackFrame>=3&&attackFrame<=14){
-    for(const e of roomState[room].enemies){
-      if(e.hp<=0||attackHits.has(e.id))continue;
-      const d=pointSegmentDist(e.x+6,e.y+7,sg.sx,sg.sy,sg.ex,sg.ey);
-      if(d<9){e.hp--;e.flash=8;attackHits.add(e.id);knockEnemy(e,dirAngle,7);if(e.hp<=0)maybeDropHeart(e);}
-    }
-  }
-  if(attackFrame>0)attackFrame--;
-  updateProjectiles();
-
-  const pc={x:px+8,y:py+8};
-  for(const e of roomState[room].enemies){
-    if(e.hp>0&&Math.hypot(pc.x-(e.x+6),pc.y-(e.y+7))<11)damagePlayer(e);
-  }
-  updateDrops();
-
-  const alive=roomState[room].enemies.some(e=>e.hp>0);
-  if(rewardRooms.has(room)&&!alive&&!roomState[room].taken)roomState[room].shard=true;
-  if(roomState[room].shard&&!roomState[room].taken){
-    const sx=128,sy=112;
-    if(Math.hypot((px+8)-sx,(py+8)-sy)<15){
-      roomState[room].taken=true;roomState[room].shard=false;shards++;showMessage('You found an Ember Shard!');if(shards>=3)won=true;
-    }
-  }
-}
-
+function tileAtRoom(ri,x,y){const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE);if(tx<0||ty<0||tx>=W||ty>=H)return '#';return rooms[ri][ty][tx]}
+function tileAt(x,y){return tileAtRoom(room,x,y)}
+function stoneAtTile(ri,tx,ty){return roomState[ri].stones.find(s=>s.x===tx&&s.y===ty)}
+function baseSolid(ri,tx,ty){if(tx<0||ty<0||tx>=W||ty>=H)return true;const ch=rooms[ri][ty][tx],k=`${ri}:${tx}:${ty}`;if(ch==='#')return true;if(ch==='X'&&!openedSecrets.has(k))return true;if(ch==='D'&&!unlockedDoors.has(k))return true;return false}
+function solidAt(x,y){const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE);if(baseSolid(room,tx,ty))return true;if(stoneAtTile(room,tx,ty))return true;return false}
+function canMove(nx,ny){return !solidAt(nx+4,ny+4)&&!solidAt(nx+11,ny+4)&&!solidAt(nx+4,ny+11)&&!solidAt(nx+11,ny+11)}
+function canEnemyMove(e,nx,ny){return !solidAt(nx+2,ny+2)&&!solidAt(nx+11,ny+2)&&!solidAt(nx+2,ny+13)&&!solidAt(nx+11,ny+13)}
+function showMessage(t){message=t;messageTimer=130}
+function changeRoom(edge){const n=links[room+','+edge];if(n==null)return false;room=n;projectiles=[];activeBombs=[];explosions=[];pushState={key:'',frames:0};if(edge==='R'){px=6;py=7*TILE}if(edge==='L'){px=234;py=7*TILE}if(edge==='D'){py=6;px=7*TILE}if(edge==='U'){py=218;px=7*TILE}return true}
+function checkPortals(){const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE),k=`${room}:${tx}:${ty}`;const s=secretPortals[k];if(s&&openedSecrets.has(k)){room=s.target;px=s.x;py=s.y;projectiles=[];activeBombs=[];explosions=[];showMessage('Hidden chamber discovered.');return}const d=doorPortals[k];if(d&&unlockedDoors.has(k)){room=d.target;px=d.x;py=d.y;projectiles=[];activeBombs=[];explosions=[];showMessage('You enter the locked treasury.');return}const r=secretReturns[k];if(r){room=r.target;px=r.x;py=r.y;projectiles=[];activeBombs=[];explosions=[];showMessage('Back to the surface.')}}
+function pointSegmentDist(px0,py0,x1,y1,x2,y2){const vx=x2-x1,vy=y2-y1,wx=px0-x1,wy=py0-y1,c1=vx*wx+vy*wy,c2=vx*vx+vy*vy;let t=c2?c1/c2:0;t=Math.max(0,Math.min(1,t));return Math.hypot(px0-(x1+t*vx),py0-(y1+t*vy))}
+function swordGeometry(){if(attackFrame<=0)return null;const progress=(16-attackFrame)/16,reach=9+17*Math.sin(Math.PI*progress),cx=px+8,cy=py+8;return{sx:cx+Math.cos(dirAngle)*7,sy:cy+Math.sin(dirAngle)*7,ex:cx+Math.cos(dirAngle)*reach,ey:cy+Math.sin(dirAngle)*reach}}
+function startAttack(){attackFrame=16;attackCooldown=7;attackHits.clear();if(hearts===MAX_HEARTS)projectiles.push({x:px+8+Math.cos(dirAngle)*20,y:py+8+Math.sin(dirAngle)*20,vx:Math.cos(dirAngle)*2.5,vy:Math.sin(dirAngle)*2.5,life:70})}
+function dropFromEnemy(e){if(e.guaranteedDrop==='bomb'){drops.push({room,x:e.x+6,y:e.y+7,type:'bomb',life:1200});return}const r=Math.random();if(r<.16)drops.push({room,x:e.x+6,y:e.y+7,type:'bomb',life:900});else if(r<.38)drops.push({room,x:e.x+6,y:e.y+7,type:'heart',life:900})}
+function knockEnemy(e,ang,dist){for(let i=0;i<dist;i++){const nx=e.x+Math.cos(ang),ny=e.y+Math.sin(ang);if(!canEnemyMove(e,nx,ny))break;e.x=nx;e.y=ny}}
+function damageEnemy(e,ang,amount=1){if(e.hp<=0)return;e.hp-=amount;e.flash=8;knockEnemy(e,ang,6);if(e.hp<=0)dropFromEnemy(e)}
+function damagePlayer(e){if(invuln>0)return;hearts--;invuln=70;const ang=Math.atan2((py+8)-(e.y+7),(px+8)-(e.x+6));for(let i=0;i<10;i++){const nx=px+Math.cos(ang),ny=py+Math.sin(ang);if(!canMove(nx,ny))break;px=nx;py=ny}if(hearts<=0)reset()}
+function chooseEnemyDir(e){e.dir=Math.floor(Math.random()*4);e.timer=35+Math.floor(Math.random()*120);e.pause=Math.random()<.28?15+Math.floor(Math.random()*35):0}
+function updateEnemies(){const dirs=[[1,0],[0,1],[-1,0],[0,-1]];for(const e of roomState[room].enemies){if(e.hp<=0)continue;if(e.flash>0)e.flash--;if(e.pause>0){e.pause--;continue}e.timer--;if(e.timer<=0)chooseEnemyDir(e);const [dx,dy]=dirs[e.dir],nx=e.x+dx*e.speed,ny=e.y+dy*e.speed;if(canEnemyMove(e,nx,ny)){e.x=nx;e.y=ny}else chooseEnemyDir(e)}}
+function updateProjectiles(){for(const p of projectiles){if(p.life<=0)continue;p.x+=p.vx;p.y+=p.vy;p.life--;if(solidAt(p.x,p.y)){p.life=0;continue}for(const e of roomState[room].enemies){if(e.hp>0&&Math.hypot(p.x-(e.x+6),p.y-(e.y+7))<9){damageEnemy(e,Math.atan2(p.vy,p.vx));p.life=0;break}}}projectiles=projectiles.filter(p=>p.life>0)}
+function placeBomb(){if(bombs<=0){showMessage('No bombs. A skeleton in the meadow carries some.');return}if(activeBombs.length>=2)return;bombs--;const d=18;activeBombs.push({room,x:px+8+Math.cos(dirAngle)*d,y:py+8+Math.sin(dirAngle)*d,fuse:90,boom:false})}
+function explodeBomb(b){b.boom=true;explosions.push({room:b.room,x:b.x,y:b.y,life:18});if(b.room!==room)return;for(const e of roomState[room].enemies){if(e.hp>0&&Math.hypot((e.x+6)-b.x,(e.y+7)-b.y)<30)damageEnemy(e,Math.atan2((e.y+7)-b.y,(e.x+6)-b.x),2)}for(const [k,p] of Object.entries(secretPortals)){if(p.type!=='bomb')continue;const [ri,tx,ty]=k.split(':').map(Number);if(ri===room&&Math.hypot(tx*TILE+8-b.x,ty*TILE+8-b.y)<34&&!openedSecrets.has(k)){openedSecrets.add(k);showMessage('BOOM! A hidden passage is exposed.')}}}
+function updateBombs(){for(const b of activeBombs){if(b.room!==room)continue;b.fuse--;if(b.fuse<=0&&!b.boom)explodeBomb(b)}activeBombs=activeBombs.filter(b=>!b.boom);for(const e of explosions)e.life--;explosions=explosions.filter(e=>e.life>0)}
+function updateDrops(){for(const d of drops)d.life--;for(const d of drops){if(d.life<=0||d.room!==room)continue;if(Math.hypot((px+8)-d.x,(py+8)-d.y)<12){if(d.type==='heart'&&hearts<MAX_HEARTS){hearts++;showMessage('Heart recovered.')}if(d.type==='bomb'){bombs+=3;showMessage('Picked up 3 bombs.')}if(d.type==='key'){keyCount++;showMessage('You found a key!')}d.life=0}}drops=drops.filter(d=>d.life>0)}
+function updateKeyRewards(){if(room===1&&!roomState[1].keySpawned&&!roomState[1].enemies.some(e=>e.hp>0)){roomState[1].keySpawned=true;drops.push({room:1,x:128,y:112,type:'key',life:99999});showMessage('The last skeleton dropped a key!')}}
+function tryUnlockDoor(){if(keyCount<=0)return;const cx=px+8,cy=py+8;for(const k of Object.keys(doorPortals)){if(unlockedDoors.has(k))continue;const [ri,tx,ty]=k.split(':').map(Number);if(ri!==room)continue;if(Math.hypot(cx-(tx*TILE+8),cy-(ty*TILE+8))<24){keyCount--;unlockedDoors.add(k);showMessage('The key unlocks the door.')}}}
+function cardinalFromVector(dx,dy){if(Math.abs(dx)>=Math.abs(dy))return[dx>=0?1:-1,0];return[0,dy>=0?1:-1]}
+function playerRectHitsTile(nx,ny,tx,ty){const l=nx+4,r=nx+12,t=ny+4,b=ny+12,sl=tx*TILE,sr=sl+16,st=ty*TILE,sb=st+16;return r>sl&&l<sr&&b>st&&t<sb}
+function tileFreeForStone(ri,tx,ty,ignore){if(tx<=0||ty<=0||tx>=W-1||ty>=H-1)return false;if(baseSolid(ri,tx,ty))return false;const other=stoneAtTile(ri,tx,ty);return !other||other===ignore}
+function handlePushAttempt(dx,dy){if(Math.hypot(dx,dy)<.2){pushState={key:'',frames:0};return false}const [sx,sy]=cardinalFromVector(dx,dy),nx=px+sx*1.5,ny=py+sy*1.5;const stone=roomState[room].stones.find(s=>playerRectHitsTile(nx,ny,s.x,s.y));if(!stone){pushState={key:'',frames:0};return false}const pk=`${room}:${stone.x}:${stone.y}:${sx}:${sy}`;if(pushState.key===pk)pushState.frames++;else pushState={key:pk,frames:1};if(pushState.frames>=120){const tx=stone.x+sx,ty=stone.y+sy;if(tileFreeForStone(room,tx,ty,stone)){const source=stone.source;stone.x=tx;stone.y=ty;pushState={key:'',frames:0};if(secretPortals[source]?.type==='push'&&!openedSecrets.has(source)){openedSecrets.add(source);showMessage('The stone slides aside, revealing a passage!')}else showMessage('The stone moves one tile.')}else{showMessage('The stone cannot move that way.');pushState={key:'',frames:0}}}return true}
+function update(){if(messageTimer>0)messageTimer--;if(won)return;if(invuln>0)invuln--;if(attackCooldown>0)attackCooldown--;
+ let dx=joyX,dy=joyY;if(keys.has('ArrowLeft')||keys.has('KeyA'))dx-=1;if(keys.has('ArrowRight')||keys.has('KeyD'))dx+=1;if(keys.has('ArrowUp')||keys.has('KeyW'))dy-=1;if(keys.has('ArrowDown')||keys.has('KeyS'))dy+=1;const mag=Math.hypot(dx,dy);if(mag>.08){const ux=dx/Math.max(1,mag),uy=dy/Math.max(1,mag),speed=attackFrame>0?.55:1.45;dirAngle=Math.atan2(uy,ux);walkTick++;const pushing=handlePushAttempt(ux,uy);if(!pushing){const mx=ux*speed,my=uy*speed;if(canMove(px+mx,py))px+=mx;if(canMove(px,py+my))py+=my}}else pushState={key:'',frames:0};
+ if(px<0&&!changeRoom('L'))px=0;if(px>240&&!changeRoom('R'))px=240;if(py<0&&!changeRoom('U'))py=0;if(py>224&&!changeRoom('D'))py=224;tryUnlockDoor();checkPortals();
+ const ap=keys.has('Space')||keys.has('Enter');if(ap&&!attackLatch&&attackFrame<=0&&attackCooldown<=0)startAttack();attackLatch=ap;const bp=keys.has('KeyB')||keys.has('ShiftLeft')||keys.has('ShiftRight');if(bp&&!bombLatch)placeBomb();bombLatch=bp;
+ updateEnemies();const sg=swordGeometry();if(sg&&attackFrame>=3&&attackFrame<=14){for(const e of roomState[room].enemies){if(e.hp<=0||attackHits.has(e.id))continue;if(pointSegmentDist(e.x+6,e.y+7,sg.sx,sg.sy,sg.ex,sg.ey)<9){attackHits.add(e.id);damageEnemy(e,dirAngle)}}}if(attackFrame>0)attackFrame--;updateProjectiles();updateBombs();
+ const pc={x:px+8,y:py+8};for(const e of roomState[room].enemies)if(e.hp>0&&Math.hypot(pc.x-(e.x+6),pc.y-(e.y+7))<11)damagePlayer(e);updateKeyRewards();updateDrops();
+ const alive=roomState[room].enemies.some(e=>e.hp>0);if(rewardRooms.has(room)&&!alive&&!roomState[room].taken)roomState[room].shard=true;if(roomState[room].shard&&!roomState[room].taken&&Math.hypot((px+8)-128,(py+8)-112)<15){roomState[room].taken=true;roomState[room].shard=false;shards++;showMessage('You found an Ember Shard!');if(shards>=3)won=true}}
 function rect(x,y,w,h,col){g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),w,h)}
-function drawSkeleton(e){
-  const x=Math.round(e.x),y=Math.round(e.y),blink=e.flash>0&&Math.floor(e.flash/2)%2;
-  const bone=blink?'#fff':'#ddd8c9';
-  rect(x+2,y,8,6,bone);rect(x+3,y+1,2,2,'#242424');rect(x+7,y+1,2,2,'#242424');rect(x+5,y+4,2,1,'#242424');
-  rect(x+5,y+6,2,7,bone);rect(x+2,y+7,8,2,bone);rect(x+3,y+10,6,1,bone);rect(x+1,y+7,2,5,bone);rect(x+9,y+7,2,5,bone);
-  const step=Math.floor((performance.now()/180)+(e.id%2))%2;
-  rect(x+3-step,y+12,2,3,bone);rect(x+7+step,y+12,2,3,bone);
-}
-function drawElf(){
-  const x=Math.round(px),y=Math.round(py),step=Math.floor(walkTick/8)%2,bob=(Math.abs(joyX)+Math.abs(joyY)>.08&&attackFrame<=0)?step:0;
-  if(invuln>0&&Math.floor(invuln/5)%2)return;
-  rect(x+3-step,y+13,4,3,'#53351f');rect(x+9+step,y+13,4,3,'#53351f');
-  rect(x+3,y+7-bob,10,7,'#2f8a3d');rect(x+2,y+9-bob,2,4,'#d8b07a');rect(x+12,y+9-bob,2,4,'#d8b07a');
-  rect(x+4,y+3-bob,8,6,'#e4b982');rect(x+2,y+4-bob,2,3,'#e4b982');rect(x+12,y+4-bob,2,3,'#e4b982');
-  rect(x+4,y+2-bob,8,2,'#73502b');rect(x+3,y+1-bob,8,2,'#39783b');rect(x+2,y-bob,5,2,'#39783b');
-  const ex=Math.round(Math.cos(dirAngle)),ey=Math.round(Math.sin(dirAngle));rect(x+7+ex*2,y+5+ey-bob,2,2,'#1b1b1b');
-  rect(x+4,y+11-bob,8,2,'#6b4428');rect(x+7,y+11-bob,2,2,'#c8a13a');
-}
-function drawSword(){
-  const s=swordGeometry();if(!s)return;
-  g.strokeStyle='#f0f0e8';g.lineWidth=3;g.beginPath();g.moveTo(s.sx,s.sy);g.lineTo(s.ex,s.ey);g.stroke();
-  g.strokeStyle='#c6a15b';g.lineWidth=4;const perp=dirAngle+Math.PI/2,gx=s.sx,gy=s.sy;
-  g.beginPath();g.moveTo(gx+Math.cos(perp)*4,gy+Math.sin(perp)*4);g.lineTo(gx-Math.cos(perp)*4,gy-Math.sin(perp)*4);g.stroke();
-}
-function drawProjectile(p){
-  g.save();g.translate(p.x,p.y);g.rotate(Math.atan2(p.vy,p.vx));rect(-5,-2,10,4,'#fff2a8');rect(-2,-4,4,8,'#f7cf4a');g.restore();
-}
-function drawHeart(x,y){
-  rect(x-4,y-3,3,3,'#d63d3d');rect(x+1,y-3,3,3,'#d63d3d');rect(x-5,y,10,3,'#d63d3d');rect(x-3,y+3,6,2,'#d63d3d');rect(x-1,y+5,2,2,'#d63d3d');
-}
-function draw(){
-  const hidden=room>=4;
-  rect(0,0,256,240,hidden?'#17151c':'#183d22');
-  const m=rooms[room];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-    const ch=m[y][x],key=`${room}:${x}:${y}`;
-    if(ch==='#'){
-      rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');
-    } else if(ch==='Q'){
-      if(openedSecrets.has(key)){rect(x*TILE,y*TILE,TILE,TILE,'#080808');rect(x*TILE+3,y*TILE+2,10,14,'#000');}
-      else {
-        rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');
-        if(DEBUG_SHOW_SECRETS&&secretPortals[key]){
-          const pulse=Math.floor(performance.now()/220)%2;
-          g.strokeStyle=pulse?'#ffff54':'#ff49ff';g.lineWidth=2;
-          g.strokeRect(x*TILE+1.5,y*TILE+1.5,TILE-3,TILE-3);
-          rect(x*TILE+6,y*TILE+3,4,7,pulse?'#ffff54':'#ff49ff');
-          rect(x*TILE+6,y*TILE+12,4,3,pulse?'#ffff54':'#ff49ff');
-        }
-      }
-    } else {
-      if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,hidden?'#211f28':'#1f4b29');
-      if(ch==='O'){rect(x*TILE+3,y*TILE+3,10,10,'#050505');rect(x*TILE+6,y*TILE+5,4,6,'#6c5838');}
-    }
-  }
-  for(const d of drops)if(d.room===room&&d.life>0)drawHeart(d.x,d.y);
-  for(const e of roomState[room].enemies)if(e.hp>0)drawSkeleton(e);
-  if(roomState[room].shard&&!roomState[room].taken){g.save();g.translate(128,112);g.rotate(Math.PI/4);rect(-5,-5,10,10,'#ffb52e');rect(-2,-2,4,4,'#fff0a0');g.restore();}
-  for(const p of projectiles)drawProjectile(p);
-  drawElf();drawSword();
-  if(messageTimer>0){rect(18,196,220,26,'rgba(0,0,0,.72)');g.fillStyle='#fff';g.font='11px monospace';g.textAlign='center';g.fillText(message,128,213);}
-  if(won){rect(20,78,216,82,'rgba(0,0,0,.86)');g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';g.fillText('THE EMBER RELIC AWAKENS!',128,108);g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133);}
-  roomEl.textContent=roomNames[room];statusEl.textContent=`♥ ${hearts}/${MAX_HEARTS}   Shards ${shards}/3${DEBUG_SHOW_SECRETS?'   TEST: ! = SECRET':''}`;
-}
-let last=performance.now(),acc=0;
-function loop(t){acc+=Math.min(50,t-last);last=t;while(acc>=16.67){update();acc-=16.67}draw();requestAnimationFrame(loop)}
-requestAnimationFrame(loop);
+function label(text,x,y,col='#fff'){g.fillStyle='rgba(0,0,0,.78)';g.fillRect(x-2,y-8,g.measureText(text).width+4,9);g.fillStyle=col;g.fillText(text,x,y-1)}
+function drawSkeleton(e){const x=Math.round(e.x),y=Math.round(e.y),bone=e.flash>0&&Math.floor(e.flash/2)%2?'#fff':'#ddd8c9';rect(x+2,y,8,6,bone);rect(x+3,y+1,2,2,'#242424');rect(x+7,y+1,2,2,'#242424');rect(x+5,y+4,2,1,'#242424');rect(x+5,y+6,2,7,bone);rect(x+2,y+7,8,2,bone);rect(x+1,y+7,2,5,bone);rect(x+9,y+7,2,5,bone);const st=Math.floor(performance.now()/180+e.id)%2;rect(x+3-st,y+12,2,3,bone);rect(x+7+st,y+12,2,3,bone)}
+function drawElf(){const x=Math.round(px),y=Math.round(py),st=Math.floor(walkTick/8)%2,bob=(Math.abs(joyX)+Math.abs(joyY)>.08&&attackFrame<=0)?st:0;if(invuln>0&&Math.floor(invuln/5)%2)return;rect(x+3-st,y+13,4,3,'#53351f');rect(x+9+st,y+13,4,3,'#53351f');rect(x+3,y+7-bob,10,7,'#2f8a3d');rect(x+2,y+9-bob,2,4,'#d8b07a');rect(x+12,y+9-bob,2,4,'#d8b07a');rect(x+4,y+3-bob,8,6,'#e4b982');rect(x+2,y+4-bob,2,3,'#e4b982');rect(x+12,y+4-bob,2,3,'#e4b982');rect(x+4,y+2-bob,8,2,'#73502b');rect(x+3,y+1-bob,8,2,'#39783b');rect(x+2,y-bob,5,2,'#39783b');const ex=Math.round(Math.cos(dirAngle)),ey=Math.round(Math.sin(dirAngle));rect(x+7+ex*2,y+5+ey-bob,2,2,'#1b1b1b');rect(x+4,y+11-bob,8,2,'#6b4428');rect(x+7,y+11-bob,2,2,'#c8a13a')}
+function drawSword(){const s=swordGeometry();if(!s)return;g.strokeStyle='#f0f0e8';g.lineWidth=3;g.beginPath();g.moveTo(s.sx,s.sy);g.lineTo(s.ex,s.ey);g.stroke();g.strokeStyle='#c6a15b';g.lineWidth=4;const perp=dirAngle+Math.PI/2;g.beginPath();g.moveTo(s.sx+Math.cos(perp)*4,s.sy+Math.sin(perp)*4);g.lineTo(s.sx-Math.cos(perp)*4,s.sy-Math.sin(perp)*4);g.stroke()}
+function drawBomb(b){rect(b.x-5,b.y-5,10,10,'#181818');rect(b.x-2,b.y-7,4,3,'#777');if(Math.floor(b.fuse/8)%2)rect(b.x+2,b.y-9,3,3,'#ffb12e')}
+function drawExplosion(e){const r=(18-e.life)*2+5;g.strokeStyle='#ffd24a';g.lineWidth=4;g.beginPath();g.arc(e.x,e.y,r,0,Math.PI*2);g.stroke();rect(e.x-r,e.y-3,r*2,6,'#ff9d2e');rect(e.x-3,e.y-r,6,r*2,'#ff9d2e')}
+function drawDrop(d){if(d.type==='heart'){rect(d.x-4,d.y-3,3,3,'#d63d3d');rect(d.x+1,d.y-3,3,3,'#d63d3d');rect(d.x-5,d.y,10,3,'#d63d3d');rect(d.x-3,d.y+3,6,2,'#d63d3d')}else if(d.type==='bomb'){rect(d.x-5,d.y-4,10,9,'#181818');rect(d.x-2,d.y-7,4,3,'#888')}else if(d.type==='key'){rect(d.x-2,d.y-7,4,10,'#f2c84b');rect(d.x-5,d.y-8,10,6,'#f2c84b');rect(d.x+1,d.y+1,6,3,'#f2c84b');rect(d.x+4,d.y+3,3,3,'#f2c84b')}}
+function draw(){const hidden=room>=4;rect(0,0,256,240,hidden?'#17151c':'#183d22');g.font='7px monospace';const m=rooms[room];for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ch=m[y][x],k=`${room}:${x}:${y}`;if(ch==='#'||(ch==='X'&&!openedSecrets.has(k))){rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');if(ch==='X'&&!openedSecrets.has(k)){rect(x*TILE+5,y*TILE+4,2,7,'#2b2926');rect(x*TILE+9,y*TILE+8,4,2,'#2b2926');if(DEBUG_SHOW_SECRETS)label('BOMB WALL',x*TILE-2,y*TILE-1,'#ffff54')}}else{if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,hidden?'#211f28':'#1f4b29');if(ch==='O'){rect(x*TILE+3,y*TILE+3,10,10,'#050505');rect(x*TILE+6,y*TILE+5,4,6,'#6c5838')}if(ch==='D'){if(unlockedDoors.has(k)){rect(x*TILE+3,y*TILE+1,10,15,'#080808')}else{rect(x*TILE+2,y*TILE+1,12,15,'#70451f');rect(x*TILE+6,y*TILE+6,4,4,'#f2c84b');if(DEBUG_SHOW_SECRETS)label('LOCK',x*TILE,y*TILE-1,'#55ffff')}}}}
+ for(const s of roomState[room].stones){rect(s.x*TILE+1,s.y*TILE+1,14,14,'#77736b');rect(s.x*TILE+4,s.y*TILE+4,8,8,'#969088');if(DEBUG_SHOW_SECRETS&&secretPortals[s.source]?.type==='push'&&!openedSecrets.has(s.source)){label('PUSH',s.x*TILE+1,s.y*TILE-1,'#ff63ff');if(pushState.key.startsWith(`${room}:${s.x}:${s.y}:`)){const p=Math.min(1,pushState.frames/120);rect(s.x*TILE+2,s.y*TILE+13,12*p,2,'#ffff54')}}}
+ for(const d of drops)if(d.room===room&&d.life>0){drawDrop(d);if(DEBUG_SHOW_SECRETS&&d.type==='key')label('KEY',d.x-7,d.y-10,'#55ffff')}
+ for(const e of roomState[room].enemies)if(e.hp>0)drawSkeleton(e);if(roomState[room].shard&&!roomState[room].taken){g.save();g.translate(128,112);g.rotate(Math.PI/4);rect(-5,-5,10,10,'#ffb52e');rect(-2,-2,4,4,'#fff0a0');g.restore()}for(const p of projectiles){g.save();g.translate(p.x,p.y);g.rotate(Math.atan2(p.vy,p.vx));rect(-5,-2,10,4,'#fff2a8');rect(-2,-4,4,8,'#f7cf4a');g.restore()}for(const b of activeBombs)if(b.room===room)drawBomb(b);for(const e of explosions)if(e.room===room)drawExplosion(e);drawElf();drawSword();if(messageTimer>0){rect(14,194,228,28,'rgba(0,0,0,.78)');g.fillStyle='#fff';g.font='10px monospace';g.textAlign='center';g.fillText(message,128,212)}if(won){rect(20,78,216,82,'rgba(0,0,0,.86)');g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';g.fillText('THE EMBER RELIC AWAKENS!',128,108);g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133)}roomEl.textContent=roomNames[room];statusEl.textContent=`♥${hearts}/${MAX_HEARTS}  💣${bombs}  🔑${keyCount}  Shards ${shards}/3${DEBUG_SHOW_SECRETS?'  TEST':''}`}
+let last=performance.now(),acc=0;function loop(t){acc+=Math.min(50,t-last);last=t;while(acc>=16.67){update();acc-=16.67}draw();requestAnimationFrame(loop)}requestAnimationFrame(loop);
 </script>
 </body>
 </html>
