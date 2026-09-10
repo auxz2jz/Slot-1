@@ -2,8 +2,11 @@
   "name": "Relic of Emberwood",
   "short_name": "Emberwood",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
-  "orientation": "landscape"
+  "background_color": "#101310",
+  "theme_color": "#101310",
+  "orientation": "any",
+  "description": "An original NES-style action-adventure prototype.",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
