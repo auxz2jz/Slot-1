@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#111" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Relic of Emberwood</title>
+  <style>
+    html,body{margin:0;background:#111;color:#eee;font-family:system-ui,sans-serif;touch-action:none;overscroll-behavior:none;height:100%}
+    body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+    #wrap{width:min(96vw,640px)}
+    canvas{width:100%;aspect-ratio:256/240;image-rendering:pixelated;background:#000;border:3px solid #444;border-radius:8px;display:block}
+    #hud{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin:4px 2px}
+    #controls{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;user-select:none;-webkit-user-select:none}
+    .dpad{display:grid;grid-template-columns:58px 58px 58px;grid-template-rows:58px 58px 58px;gap:4px}
+    button{border:0;border-radius:14px;background:#333;color:#fff;font-weight:800;font-size:22px;box-shadow:inset 0 -4px #222;touch-action:none}
+    button:active,.held{transform:translateY(2px);box-shadow:inset 0 -2px #111;background:#555}
+    .up{grid-column:2}.left{grid-column:1;grid-row:2}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}
+    .actions{display:flex;gap:18px;align-items:center}.actions button{width:76px;height:76px;border-radius:50%;background:#7d2a2a}.actions .b{background:#3a3a7d}
+    #start{font-size:12px;padding:9px 16px;border-radius:20px;background:#444}
+    .help{font-size:12px;opacity:.7;text-align:center}
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud"><span id="room"></span><span id="status"></span></div>
+  <canvas id="game" width="256" height="240"></canvas>
+  <div id="controls">
+    <div class="dpad">
+      <button class="up" data-k="ArrowUp">▲</button>
+      <button class="left" data-k="ArrowLeft">◀</button>
+      <button class="right" data-k="ArrowRight">▶</button>
+      <button class="down" data-k="ArrowDown">▼</button>
+    </div>
+    <button id="start">RESET</button>
+    <div class="actions"><button class="b" data-k="KeyB">B</button><button data-k="Space">A</button></div>
+  </div>
+  <div class="help">Move: D-pad / arrows · A: sword · B: interact/search · Find all 3 ember shards.</div>
+</div>
+<script>
+const c=document.getElementById('game'),g=c.getContext('2d'); g.imageSmoothingEnabled=false;
+const keys=new Set();
+const roomEl=document.getElementById('room'),statusEl=document.getElementById('status');
+for(const b of document.querySelectorAll('[data-k]')){
+  const k=b.dataset.k;
+  const on=e=>{e.preventDefault();keys.add(k);b.classList.add('held')};
+  const off=e=>{e.preventDefault();keys.delete(k);b.classList.remove('held')};
+  b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off); b.addEventListener('pointercancel',off); b.addEventListener('pointerleave',off);
+}
+addEventListener('keydown',e=>keys.add(e.code==='ArrowUp'||e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='ArrowRight'?e.code:e.code));
+addEventListener('keyup',e=>keys.delete(e.code));
+document.getElementById('start').onclick=reset;
+
+const TILE=16, W=16,H=15;
+const rooms=[
+[
+'################',
+'#..............#',
+'#..##..........#',
+'#..##......E...#',
+'#..............#',
+'#......####....#',
+'#..............#',
+'#..............>',
+'#....S.........#',
+'#..............#',
+'#.........##...#',
+'#.........##...#',
+'#..............#',
+'#..............#',
+'#######v########'],
+[
+'################',
+'#..............#',
+'#.....#####....#',
+'#.........#....#',
+'#..E......#....#',
+'#.........#....#',
+'<.........#....#',
+'#.........#....#',
+'#.........#....#',
+'#....######....#',
+'#..............#',
+'#.......S......#',
+'#..............#',
+'#..............#',
+'#######v########'],
+[
+'#######^########',
+'#..............#',
+'#..######......#',
+'#..............#',
+'#...........E..#',
+'#..............#',
+'#......####....#',
+'#......#.......>',
+'#..S...#.......#',
+'#......#.......#',
+'#......####....#',
+'#..............#',
+'#..............#',
+'#..............#',
+'################'],
+[
+'#######^########',
+'#..............#',
+'#....E.........#',
+'#..............#',
+'#....######....#',
+'#..............#',
+'<..............#',
+'#..............#',
+'#......H.......#',
+'#..............#',
+'#....######....#',
+'#..............#',
+'#..........S...#',
+'#..............#',
+'################']
+];
+const links={ '0,R':1,'1,L':0,'0,D':2,'2,U':0,'1,D':3,'3,U':1,'2,R':3,'3,L':2 };
+let room,px,py,dir,attack,hearts,shards,roomState,won,interactLatch;
+function reset(){
+ room=0;px=40;py=112;dir='D';attack=0;hearts=3;shards=0;won=false;interactLatch=false;
+ roomState=rooms.map((m,ri)=>({enemies:[],shard:false,secret:false}));
+ rooms.forEach((m,ri)=>m.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch==='E')roomState[ri].enemies.push({x:x*TILE+4,y:y*TILE+4,hp:2,dx:ri%2?0.35:-0.35,dy:0});}))); 
+}
+reset();
+function tileAt(x,y){const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE); if(tx<0||ty<0||tx>=W||ty>=H)return '#'; return rooms[room][ty][tx];}
+function solidAt(x,y){return tileAt(x,y)==='#';}
+function canMove(nx,ny){return !solidAt(nx+3,ny+3)&&!solidAt(nx+12,ny+3)&&!solidAt(nx+3,ny+12)&&!solidAt(nx+12,ny+12);}
+function changeRoom(edge){const n=links[room+','+edge]; if(n==null)return false; room=n; if(edge==='R')px=4;if(edge==='L')px=236;if(edge==='D')py=4;if(edge==='U')py=220;return true;}
+function hit(a,b,r=11){return Math.abs(a.x-b.x)<r&&Math.abs(a.y-b.y)<r;}
+function swordBox(){let x=px+4,y=py+4;if(dir==='R')x+=14;if(dir==='L')x-=14;if(dir==='D')y+=14;if(dir==='U')y-=14;return{x,y};}
+function update(){
+ if(won)return;
+ let dx=0,dy=0;if(keys.has('ArrowLeft')){dx=-1.25;dir='L'}if(keys.has('ArrowRight')){dx=1.25;dir='R'}if(keys.has('ArrowUp')){dy=-1.25;dir='U'}if(keys.has('ArrowDown')){dy=1.25;dir='D'}
+ if(dx&&canMove(px+dx,py))px+=dx;if(dy&&canMove(px,py+dy))py+=dy;
+ if(px<0&&!changeRoom('L'))px=0;if(px>240&&!changeRoom('R'))px=240;if(py<0&&!changeRoom('U'))py=0;if(py>224&&!changeRoom('D'))py=224;
+ if(keys.has('Space')&&attack<=0)attack=12; if(attack>0)attack--;
+ const interact=keys.has('KeyB');
+ if(interact&&!interactLatch){
+   const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE); const around=[[tx,ty],[tx+1,ty],[tx-1,ty],[tx,ty+1],[tx,ty-1]];
+   for(const [x,y] of around){ if(rooms[room][y]?.[x]==='S'){roomState[room].secret=true; roomState[room].shard=true;} }
+ }
+ interactLatch=interact;
+ const sb=swordBox();
+ for(const e of roomState[room].enemies){if(e.hp<=0)continue;e.x+=e.dx;e.y+=e.dy;if(solidAt(e.x,e.y)||solidAt(e.x+10,e.y+10))e.dx*=-1;if(attack>4&&hit(sb,e,13)){e.hp--;attack=4;}}
+ const alive=roomState[room].enemies.some(e=>e.hp>0);
+ if(!alive&&!roomState[room].shard)roomState[room].shard=true;
+ if(roomState[room].shard&&!roomState[room].taken){const sx=128,sy=112;if(Math.abs(px-sx)<15&&Math.abs(py-sy)<15){roomState[room].taken=true;shards++;if(shards>=3)won=true;}}
+}
+function rect(x,y,w,h,col){g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),w,h)}
+function draw(){
+ rect(0,0,256,240,'#183d22');
+ const m=rooms[room];
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ch=m[y][x];if(ch==='#'){rect(x*TILE,y*TILE,TILE,TILE,'#575044');rect(x*TILE+2,y*TILE+2,12,12,'#786d5b')} else {if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,'#1f4b29');if(ch==='S'&&!roomState[room].secret){rect(x*TILE+3,y*TILE+3,10,10,'#575044');rect(x*TILE+6,y*TILE+6,4,4,'#333')}}}
+ for(const e of roomState[room].enemies){if(e.hp<=0)continue;rect(e.x,e.y,10,10,'#b43c35');rect(e.x+2,e.y+2,2,2,'#fff');rect(e.x+6,e.y+2,2,2,'#fff')}
+ if(roomState[room].shard&&!roomState[room].taken){g.save();g.translate(132,116);g.rotate(Math.PI/4);rect(-5,-5,10,10,'#ffb52e');g.restore()}
+ rect(px,py,16,16,'#d7c76e');rect(px+3,py+3,10,10,'#3f6ca8');
+ if(attack>0){const s=swordBox();if(dir==='L'||dir==='R')rect(s.x-8,s.y-2,16,4,'#eee');else rect(s.x-2,s.y-8,4,16,'#eee')}
+ if(won){rect(20,78,216,82,'rgba(0,0,0,.8)');g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';g.fillText('THE EMBER RELIC AWAKENS!',128,108);g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133)}
+ roomEl.textContent=`Room ${room+1}`;statusEl.textContent=`♥ ${hearts}   Shards ${shards}/3`;
+}
+let last=0;function loop(t){const steps=Math.min(3,Math.floor((t-last)/16.67)||1);for(let i=0;i<steps;i++)update();draw();last=t;requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>
