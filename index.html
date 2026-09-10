@@ -42,7 +42,7 @@
     <div class="centerControls"><button id="start">RESET</button></div>
     <div class="actions"><button class="b" data-k="KeyB">B</button><button data-k="Space">A</button></div>
   </div>
-  <div class="help">Move: 360° stick / arrows · A: sword · B: search/interact · Full health: sword wave · Find all 3 ember shards.</div>
+  <div class="help">Move: 360° stick / arrows · A: sword · B: search/interact · TEST BUILD: flashing ! marks hidden entrances.</div>
 </div>
 <script>
 const c=document.getElementById('game'),g=c.getContext('2d');g.imageSmoothingEnabled=false;
@@ -173,6 +173,7 @@ const rooms=[
 ];
 const roomNames=['Emberwood Meadow','Old Stone Road','South Grove','Ruined Court','Hidden Crypt','Forgotten Vault'];
 const links={'0,R':1,'1,L':0,'0,D':2,'2,U':0,'1,D':3,'3,U':1,'2,R':3,'3,L':2};
+const DEBUG_SHOW_SECRETS=true; // TEMPORARY TEST MARKERS — set false/remove later
 const secretPortals={
   '0:4:8':{target:4,x:120,y:176,returnRoom:0,returnX:80,returnY:144},
   '3:11:12':{target:5,x:120,y:176,returnRoom:3,returnX:176,returnY:192}
@@ -421,7 +422,16 @@ function draw(){
       rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');
     } else if(ch==='Q'){
       if(openedSecrets.has(key)){rect(x*TILE,y*TILE,TILE,TILE,'#080808');rect(x*TILE+3,y*TILE+2,10,14,'#000');}
-      else {rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');}
+      else {
+        rect(x*TILE,y*TILE,TILE,TILE,hidden?'#3c3943':'#575044');rect(x*TILE+2,y*TILE+2,12,12,hidden?'#56515e':'#786d5b');
+        if(DEBUG_SHOW_SECRETS&&secretPortals[key]){
+          const pulse=Math.floor(performance.now()/220)%2;
+          g.strokeStyle=pulse?'#ffff54':'#ff49ff';g.lineWidth=2;
+          g.strokeRect(x*TILE+1.5,y*TILE+1.5,TILE-3,TILE-3);
+          rect(x*TILE+6,y*TILE+3,4,7,pulse?'#ffff54':'#ff49ff');
+          rect(x*TILE+6,y*TILE+12,4,3,pulse?'#ffff54':'#ff49ff');
+        }
+      }
     } else {
       if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,hidden?'#211f28':'#1f4b29');
       if(ch==='O'){rect(x*TILE+3,y*TILE+3,10,10,'#050505');rect(x*TILE+6,y*TILE+5,4,6,'#6c5838');}
@@ -434,7 +444,7 @@ function draw(){
   drawElf();drawSword();
   if(messageTimer>0){rect(18,196,220,26,'rgba(0,0,0,.72)');g.fillStyle='#fff';g.font='11px monospace';g.textAlign='center';g.fillText(message,128,213);}
   if(won){rect(20,78,216,82,'rgba(0,0,0,.86)');g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';g.fillText('THE EMBER RELIC AWAKENS!',128,108);g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133);}
-  roomEl.textContent=roomNames[room];statusEl.textContent=`♥ ${hearts}/${MAX_HEARTS}   Shards ${shards}/3`;
+  roomEl.textContent=roomNames[room];statusEl.textContent=`♥ ${hearts}/${MAX_HEARTS}   Shards ${shards}/3${DEBUG_SHOW_SECRETS?'   TEST: ! = SECRET':''}`;
 }
 let last=performance.now(),acc=0;
 function loop(t){acc+=Math.min(50,t-last);last=t;while(acc>=16.67){update();acc-=16.67}draw();requestAnimationFrame(loop)}
