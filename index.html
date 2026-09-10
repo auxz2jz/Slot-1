@@ -8,18 +8,29 @@
   <title>Relic of Emberwood</title>
   <style>
     html,body{margin:0;background:#111;color:#eee;font-family:system-ui,sans-serif;touch-action:none;overscroll-behavior:none;height:100%}
-    body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+    body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
     #wrap{width:min(96vw,640px)}
     canvas{width:100%;aspect-ratio:256/240;image-rendering:pixelated;background:#000;border:3px solid #444;border-radius:8px;display:block}
     #hud{display:flex;justify-content:space-between;font-weight:700;font-size:14px;margin:4px 2px}
     #controls{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;user-select:none;-webkit-user-select:none}
-    .dpad{display:grid;grid-template-columns:58px 58px 58px;grid-template-rows:58px 58px 58px;gap:4px}
+    #stick{width:156px;height:156px;border-radius:50%;background:#292929;position:relative;box-shadow:inset 0 0 0 3px #444;touch-action:none}
+    #stick:before,#stick:after{content:"";position:absolute;background:#3d3d3d;opacity:.8}
+    #stick:before{width:4px;height:120px;left:76px;top:18px}
+    #stick:after{height:4px;width:120px;left:18px;top:76px}
+    #knob{width:64px;height:64px;border-radius:50%;background:#555;position:absolute;left:46px;top:46px;box-shadow:inset 0 -5px #333;pointer-events:none}
     button{border:0;border-radius:14px;background:#333;color:#fff;font-weight:800;font-size:22px;box-shadow:inset 0 -4px #222;touch-action:none}
     button:active,.held{transform:translateY(2px);box-shadow:inset 0 -2px #111;background:#555}
-    .up{grid-column:2}.left{grid-column:1;grid-row:2}.right{grid-column:3;grid-row:2}.down{grid-column:2;grid-row:3}
-    .actions{display:flex;gap:18px;align-items:center}.actions button{width:76px;height:76px;border-radius:50%;background:#7d2a2a}.actions .b{background:#3a3a7d}
+    .actions{display:flex;gap:16px;align-items:center}.actions button{width:76px;height:76px;border-radius:50%;background:#7d2a2a}.actions .b{background:#3a3a7d}
     #start{font-size:12px;padding:9px 16px;border-radius:20px;background:#444}
-    .help{font-size:12px;opacity:.7;text-align:center}
+    .centerControls{display:flex;flex-direction:column;gap:10px;align-items:center}
+    .help{font-size:12px;opacity:.75;text-align:center}
+    @media(max-width:470px){
+      #stick{width:132px;height:132px}
+      #knob{left:34px;top:34px}
+      #stick:before{height:100px;left:64px;top:16px}
+      #stick:after{width:100px;left:16px;top:64px}
+      .actions{gap:10px}.actions button{width:66px;height:66px}
+    }
   </style>
 </head>
 <body>
@@ -27,32 +38,43 @@
   <div id="hud"><span id="room"></span><span id="status"></span></div>
   <canvas id="game" width="256" height="240"></canvas>
   <div id="controls">
-    <div class="dpad">
-      <button class="up" data-k="ArrowUp">▲</button>
-      <button class="left" data-k="ArrowLeft">◀</button>
-      <button class="right" data-k="ArrowRight">▶</button>
-      <button class="down" data-k="ArrowDown">▼</button>
-    </div>
-    <button id="start">RESET</button>
+    <div id="stick" aria-label="360 degree movement joystick"><div id="knob"></div></div>
+    <div class="centerControls"><button id="start">RESET</button></div>
     <div class="actions"><button class="b" data-k="KeyB">B</button><button data-k="Space">A</button></div>
   </div>
-  <div class="help">Move: D-pad / arrows · A: sword · B: interact/search · Find all 3 ember shards.</div>
+  <div class="help">Move: 360° stick / arrow keys · A: sword · B: interact/search · Find all 3 ember shards.</div>
 </div>
 <script>
-const c=document.getElementById('game'),g=c.getContext('2d'); g.imageSmoothingEnabled=false;
+const c=document.getElementById('game'),g=c.getContext('2d');g.imageSmoothingEnabled=false;
 const keys=new Set();
 const roomEl=document.getElementById('room'),statusEl=document.getElementById('status');
 for(const b of document.querySelectorAll('[data-k]')){
   const k=b.dataset.k;
   const on=e=>{e.preventDefault();keys.add(k);b.classList.add('held')};
   const off=e=>{e.preventDefault();keys.delete(k);b.classList.remove('held')};
-  b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off); b.addEventListener('pointercancel',off); b.addEventListener('pointerleave',off);
+  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('pointerleave',off);
 }
-addEventListener('keydown',e=>keys.add(e.code==='ArrowUp'||e.code==='ArrowDown'||e.code==='ArrowLeft'||e.code==='ArrowRight'?e.code:e.code));
+addEventListener('keydown',e=>keys.add(e.code));
 addEventListener('keyup',e=>keys.delete(e.code));
 document.getElementById('start').onclick=reset;
 
-const TILE=16, W=16,H=15;
+const stick=document.getElementById('stick'),knob=document.getElementById('knob');
+let joyX=0,joyY=0,stickPointer=null;
+function setStickFromEvent(e){
+  const r=stick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  let dx=e.clientX-cx,dy=e.clientY-cy;
+  const radius=r.width*.34;
+  const mag=Math.hypot(dx,dy);
+  if(mag>radius){dx=dx/mag*radius;dy=dy/mag*radius;}
+  joyX=dx/radius;joyY=dy/radius;
+  knob.style.transform=`translate(${dx}px,${dy}px)`;
+}
+stick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;stick.setPointerCapture(e.pointerId);setStickFromEvent(e)});
+stick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer)setStickFromEvent(e)});
+function releaseStick(e){if(e.pointerId!==stickPointer)return;stickPointer=null;joyX=joyY=0;knob.style.transform='translate(0px,0px)'}
+stick.addEventListener('pointerup',releaseStick);stick.addEventListener('pointercancel',releaseStick);
+
+const TILE=16,W=16,H=15;
 const rooms=[
 [
 '################',
@@ -77,8 +99,8 @@ const rooms=[
 '#.........#....#',
 '#..E......#....#',
 '#.........#....#',
-'<.........#....#',
 '#.........#....#',
+'<.........#....#',
 '#.........#....#',
 '#....######....#',
 '#..............#',
@@ -109,8 +131,8 @@ const rooms=[
 '#..............#',
 '#....######....#',
 '#..............#',
-'<..............#',
 '#..............#',
+'<..............#',
 '#......H.......#',
 '#..............#',
 '#....######....#',
@@ -119,52 +141,170 @@ const rooms=[
 '#..............#',
 '################']
 ];
-const links={ '0,R':1,'1,L':0,'0,D':2,'2,U':0,'1,D':3,'3,U':1,'2,R':3,'3,L':2 };
-let room,px,py,dir,attack,hearts,shards,roomState,won,interactLatch;
+const links={'0,R':1,'1,L':0,'0,D':2,'2,U':0,'1,D':3,'3,U':1,'2,R':3,'3,L':2};
+let room,px,py,dirAngle,attack,hearts,shards,roomState,won,interactLatch,attackLatch,invuln;
 function reset(){
- room=0;px=40;py=112;dir='D';attack=0;hearts=3;shards=0;won=false;interactLatch=false;
- roomState=rooms.map((m,ri)=>({enemies:[],shard:false,secret:false}));
- rooms.forEach((m,ri)=>m.forEach((r,y)=>[...r].forEach((ch,x)=>{if(ch==='E')roomState[ri].enemies.push({x:x*TILE+4,y:y*TILE+4,hp:2,dx:ri%2?0.35:-0.35,dy:0});}))); 
+ room=0;px=40;py=112;dirAngle=Math.PI/2;attack=0;hearts=3;shards=0;won=false;interactLatch=false;attackLatch=false;invuln=0;
+ roomState=rooms.map(()=>({enemies:[],shard:false,secret:false,taken:false}));
+ rooms.forEach((m,ri)=>m.forEach((r,y)=>[...r].forEach((ch,x)=>{
+   if(ch==='E')roomState[ri].enemies.push({x:x*TILE+3,y:y*TILE+3,hp:3,phase:(x+y+ri)*.7});
+ })));
 }
 reset();
-function tileAt(x,y){const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE); if(tx<0||ty<0||tx>=W||ty>=H)return '#'; return rooms[room][ty][tx];}
+
+function tileAt(x,y){
+ const tx=Math.floor(x/TILE),ty=Math.floor(y/TILE);
+ if(tx<0||ty<0||tx>=W||ty>=H)return '#';
+ return rooms[room][ty][tx];
+}
 function solidAt(x,y){return tileAt(x,y)==='#';}
-function canMove(nx,ny){return !solidAt(nx+3,ny+3)&&!solidAt(nx+12,ny+3)&&!solidAt(nx+3,ny+12)&&!solidAt(nx+12,ny+12);}
-function changeRoom(edge){const n=links[room+','+edge]; if(n==null)return false; room=n; if(edge==='R')px=4;if(edge==='L')px=236;if(edge==='D')py=4;if(edge==='U')py=220;return true;}
-function hit(a,b,r=11){return Math.abs(a.x-b.x)<r&&Math.abs(a.y-b.y)<r;}
-function swordBox(){let x=px+4,y=py+4;if(dir==='R')x+=14;if(dir==='L')x-=14;if(dir==='D')y+=14;if(dir==='U')y-=14;return{x,y};}
+function canMove(nx,ny){
+ return !solidAt(nx+4,ny+4)&&!solidAt(nx+11,ny+4)&&!solidAt(nx+4,ny+11)&&!solidAt(nx+11,ny+11);
+}
+function changeRoom(edge){
+ const n=links[room+','+edge];if(n==null)return false;
+ room=n;
+ if(edge==='R'){px=6;py=7*TILE;}
+ if(edge==='L'){px=234;py=7*TILE;}
+ if(edge==='D'){py=6;px=7*TILE;}
+ if(edge==='U'){py=218;px=7*TILE;}
+ return true;
+}
+function hit(a,b,r=11){return Math.hypot(a.x-b.x,a.y-b.y)<r;}
+function swordTip(){
+ const cx=px+8,cy=py+8,d=18;
+ return{x:cx+Math.cos(dirAngle)*d,y:cy+Math.sin(dirAngle)*d};
+}
+function damagePlayer(){
+ if(invuln>0)return;
+ hearts--;invuln=60;
+ if(hearts<=0){reset();}
+}
+
 function update(){
  if(won)return;
- let dx=0,dy=0;if(keys.has('ArrowLeft')){dx=-1.25;dir='L'}if(keys.has('ArrowRight')){dx=1.25;dir='R'}if(keys.has('ArrowUp')){dy=-1.25;dir='U'}if(keys.has('ArrowDown')){dy=1.25;dir='D'}
- if(dx&&canMove(px+dx,py))px+=dx;if(dy&&canMove(px,py+dy))py+=dy;
- if(px<0&&!changeRoom('L'))px=0;if(px>240&&!changeRoom('R'))px=240;if(py<0&&!changeRoom('U'))py=0;if(py>224&&!changeRoom('D'))py=224;
- if(keys.has('Space')&&attack<=0)attack=12; if(attack>0)attack--;
- const interact=keys.has('KeyB');
+ if(invuln>0)invuln--;
+ let dx=joyX,dy=joyY;
+ if(keys.has('ArrowLeft')||keys.has('KeyA'))dx-=1;
+ if(keys.has('ArrowRight')||keys.has('KeyD'))dx+=1;
+ if(keys.has('ArrowUp')||keys.has('KeyW'))dy-=1;
+ if(keys.has('ArrowDown')||keys.has('KeyS'))dy+=1;
+ const mag=Math.hypot(dx,dy);
+ if(mag>.08){
+   const nx=dx/Math.max(1,mag),ny=dy/Math.max(1,mag),speed=1.45;
+   dx=nx*speed;dy=ny*speed;
+   dirAngle=Math.atan2(dy,dx);
+   if(canMove(px+dx,py))px+=dx;
+   if(canMove(px,py+dy))py+=dy;
+ }
+ if(px<0&&!changeRoom('L'))px=0;
+ if(px>240&&!changeRoom('R'))px=240;
+ if(py<0&&!changeRoom('U'))py=0;
+ if(py>224&&!changeRoom('D'))py=224;
+ const attackPressed=keys.has('Space')||keys.has('Enter');
+ if(attackPressed&&!attackLatch&&attack<=0)attack=14;
+ attackLatch=attackPressed;
+ if(attack>0)attack--;
+ const interact=keys.has('KeyB')||keys.has('ShiftLeft')||keys.has('ShiftRight');
  if(interact&&!interactLatch){
-   const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE); const around=[[tx,ty],[tx+1,ty],[tx-1,ty],[tx,ty+1],[tx,ty-1]];
-   for(const [x,y] of around){ if(rooms[room][y]?.[x]==='S'){roomState[room].secret=true; roomState[room].shard=true;} }
+   const tx=Math.floor((px+8)/TILE),ty=Math.floor((py+8)/TILE);
+   const around=[[tx,ty],[tx+1,ty],[tx-1,ty],[tx,ty+1],[tx,ty-1]];
+   for(const [x,y] of around){
+     if(rooms[room][y]?.[x]==='S'){roomState[room].secret=true;roomState[room].shard=true;}
+   }
  }
  interactLatch=interact;
- const sb=swordBox();
- for(const e of roomState[room].enemies){if(e.hp<=0)continue;e.x+=e.dx;e.y+=e.dy;if(solidAt(e.x,e.y)||solidAt(e.x+10,e.y+10))e.dx*=-1;if(attack>4&&hit(sb,e,13)){e.hp--;attack=4;}}
+ const sb=swordTip(),pc={x:px+8,y:py+8};
+ for(const e of roomState[room].enemies){
+   if(e.hp<=0)continue;
+   e.phase+=.03;
+   const ex=e.x+6,ey=e.y+7;
+   let vx=pc.x-ex,vy=pc.y-ey,em=Math.hypot(vx,vy)||1;
+   vx=(vx/em)*.33+Math.cos(e.phase)*.12;
+   vy=(vy/em)*.33+Math.sin(e.phase*.8)*.12;
+   if(!solidAt(e.x+vx+3,e.y+4)&&!solidAt(e.x+vx+9,e.y+10))e.x+=vx;
+   if(!solidAt(e.x+3,e.y+vy+4)&&!solidAt(e.x+9,e.y+vy+10))e.y+=vy;
+   if(attack>4&&hit(sb,{x:e.x+6,y:e.y+7},14)){e.hp--;attack=4;}
+   if(hit(pc,{x:e.x+6,y:e.y+7},11))damagePlayer();
+ }
  const alive=roomState[room].enemies.some(e=>e.hp>0);
  if(!alive&&!roomState[room].shard)roomState[room].shard=true;
- if(roomState[room].shard&&!roomState[room].taken){const sx=128,sy=112;if(Math.abs(px-sx)<15&&Math.abs(py-sy)<15){roomState[room].taken=true;shards++;if(shards>=3)won=true;}}
+ if(roomState[room].shard&&!roomState[room].taken){
+   const sx=128,sy=112;
+   if(Math.hypot((px+8)-sx,(py+8)-sy)<15){
+     roomState[room].taken=true;shards++;if(shards>=3)won=true;
+   }
+ }
 }
+
 function rect(x,y,w,h,col){g.fillStyle=col;g.fillRect(Math.round(x),Math.round(y),w,h)}
+function drawSkeleton(e){
+ const x=Math.round(e.x),y=Math.round(e.y);
+ rect(x+2,y,8,6,'#ddd8c9');
+ rect(x+3,y+1,2,2,'#242424');rect(x+7,y+1,2,2,'#242424');
+ rect(x+5,y+4,2,1,'#242424');
+ rect(x+5,y+6,2,7,'#e8e1cf');
+ rect(x+2,y+7,8,2,'#e8e1cf');rect(x+3,y+10,6,1,'#e8e1cf');
+ rect(x+1,y+7,2,5,'#ddd8c9');rect(x+9,y+7,2,5,'#ddd8c9');
+ rect(x+3,y+12,2,3,'#ddd8c9');rect(x+7,y+12,2,3,'#ddd8c9');
+}
+function drawElf(){
+ const x=Math.round(px),y=Math.round(py);
+ if(invuln>0&&Math.floor(invuln/5)%2)return;
+ rect(x+3,y+13,4,3,'#53351f');rect(x+9,y+13,4,3,'#53351f');
+ rect(x+3,y+7,10,7,'#2f8a3d');
+ rect(x+2,y+9,2,4,'#d8b07a');rect(x+12,y+9,2,4,'#d8b07a');
+ rect(x+4,y+3,8,6,'#e4b982');
+ rect(x+2,y+4,2,3,'#e4b982');rect(x+12,y+4,2,3,'#e4b982');
+ rect(x+4,y+2,8,2,'#73502b');
+ rect(x+3,y+1,8,2,'#39783b');rect(x+2,y,5,2,'#39783b');
+ const ex=Math.round(Math.cos(dirAngle)),ey=Math.round(Math.sin(dirAngle));
+ rect(x+7+ex*2,y+5+ey,2,2,'#1b1b1b');
+ rect(x+4,y+11,8,2,'#6b4428');rect(x+7,y+11,2,2,'#c8a13a');
+}
+function drawSword(){
+ if(attack<=0)return;
+ const cx=px+8,cy=py+8;
+ const sx=cx+Math.cos(dirAngle)*8,sy=cy+Math.sin(dirAngle)*8;
+ const ex=cx+Math.cos(dirAngle)*24,ey=cy+Math.sin(dirAngle)*24;
+ g.strokeStyle='#f0f0e8';g.lineWidth=3;g.beginPath();g.moveTo(sx,sy);g.lineTo(ex,ey);g.stroke();
+ g.strokeStyle='#c6a15b';g.lineWidth=4;
+ const gx=cx+Math.cos(dirAngle)*8,gy=cy+Math.sin(dirAngle)*8;
+ const perp=dirAngle+Math.PI/2;
+ g.beginPath();g.moveTo(gx+Math.cos(perp)*4,gy+Math.sin(perp)*4);g.lineTo(gx-Math.cos(perp)*4,gy-Math.sin(perp)*4);g.stroke();
+}
 function draw(){
  rect(0,0,256,240,'#183d22');
  const m=rooms[room];
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const ch=m[y][x];if(ch==='#'){rect(x*TILE,y*TILE,TILE,TILE,'#575044');rect(x*TILE+2,y*TILE+2,12,12,'#786d5b')} else {if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,'#1f4b29');if(ch==='S'&&!roomState[room].secret){rect(x*TILE+3,y*TILE+3,10,10,'#575044');rect(x*TILE+6,y*TILE+6,4,4,'#333')}}}
- for(const e of roomState[room].enemies){if(e.hp<=0)continue;rect(e.x,e.y,10,10,'#b43c35');rect(e.x+2,e.y+2,2,2,'#fff');rect(e.x+6,e.y+2,2,2,'#fff')}
- if(roomState[room].shard&&!roomState[room].taken){g.save();g.translate(132,116);g.rotate(Math.PI/4);rect(-5,-5,10,10,'#ffb52e');g.restore()}
- rect(px,py,16,16,'#d7c76e');rect(px+3,py+3,10,10,'#3f6ca8');
- if(attack>0){const s=swordBox();if(dir==='L'||dir==='R')rect(s.x-8,s.y-2,16,4,'#eee');else rect(s.x-2,s.y-8,4,16,'#eee')}
- if(won){rect(20,78,216,82,'rgba(0,0,0,.8)');g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';g.fillText('THE EMBER RELIC AWAKENS!',128,108);g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133)}
- roomEl.textContent=`Room ${room+1}`;statusEl.textContent=`♥ ${hearts}   Shards ${shards}/3`;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+   const ch=m[y][x];
+   if(ch==='#'){rect(x*TILE,y*TILE,TILE,TILE,'#575044');rect(x*TILE+2,y*TILE+2,12,12,'#786d5b')}
+   else{
+     if((x+y)%2===0)rect(x*TILE,y*TILE,TILE,TILE,'#1f4b29');
+     if(ch==='S'&&!roomState[room].secret){rect(x*TILE+3,y*TILE+3,10,10,'#575044');rect(x*TILE+6,y*TILE+6,4,4,'#333')}
+   }
+ }
+ for(const e of roomState[room].enemies)if(e.hp>0)drawSkeleton(e);
+ if(roomState[room].shard&&!roomState[room].taken){
+   g.save();g.translate(128,112);g.rotate(Math.PI/4);rect(-5,-5,10,10,'#ffb52e');g.restore();
+ }
+ drawElf();drawSword();
+ if(won){
+   rect(20,78,216,82,'rgba(0,0,0,.8)');
+   g.fillStyle='#fff';g.font='bold 14px monospace';g.textAlign='center';
+   g.fillText('THE EMBER RELIC AWAKENS!',128,108);
+   g.font='12px monospace';g.fillText('Demo complete — press RESET',128,133);
+ }
+ roomEl.textContent=`Room ${room+1}`;
+ statusEl.textContent=`♥ ${hearts}   Shards ${shards}/3`;
 }
-let last=0;function loop(t){const steps=Math.min(3,Math.floor((t-last)/16.67)||1);for(let i=0;i<steps;i++)update();draw();last=t;requestAnimationFrame(loop)}requestAnimationFrame(loop);
-
+let last=performance.now(),acc=0;
+function loop(t){
+ acc+=Math.min(50,t-last);last=t;
+ while(acc>=16.67){update();acc-=16.67}
+ draw();requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
