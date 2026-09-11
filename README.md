@@ -1,30 +1,19 @@
-# Relic of Emberwood — v26
+# Relic of Emberwood — Expanded Edition v34
 
-An original top-down action-adventure inspired by the structure and feel of classic 8-bit exploration games without using copyrighted maps, sprites, music, characters, or other game assets.
+Original long-form top-down action adventure.
 
-## Current build
+- 10×10 overworld: 100 outdoor screens
+- 88 interiors total, including 79 dungeon rooms
+- Eight Ember Shards required for the final Ember Citadel
+- Seven major pre-final dungeons plus the eight-room final Citadel
+- Small keys, Master Key, dungeon clear gates and rune trials
+- Bombs (round, timed, and dangerous to the hero), Wind Disc, Sun Bow, Ember Rod
+- Magic meter, Mirror Shield, Storm Boots, Pearl Edge
+- Verdant/Guardian/Moon Rings
+- Traveler, Tide, Ember and Shadow outfits with gameplay effects
+- Breakable pots, cuttable grass, spikes, pillars, secrets and shops
+- Boss-specific attack patterns and a multi-phase final boss
+- 768×720 backing canvas with embedded 48-pixel source sprite atlas for denser 16/32-bit-era art
+- Keyboard, phone controls, gamepad, autosave and offline/PWA support
 
-- 10×10 overworld: 100 connected outdoor screens
-- Multiple biomes with unique palettes, animated ambience, roads, landmarks, and regional enemy mixes
-- 20 interiors, including two multi-room dungeons
-- Ancient Gate dungeon and Sunken Archive dungeon
-- Original Ember Hamlet village, NPC dialogue, shop, secrets, bomb walls, push stones, stairs, caves, locked gates, and final shrine
-- Sword combat, full-health sword wave, shield blocking, bombs, Wind Disc, keys, rupees, health upgrades, bomb capacity upgrade, and Pearl Edge sword upgrade
-- Multiple enemy archetypes plus distinct dungeon/final bosses
-- Boss health bars, telegraphed attacks, unique projectile patterns, trails, hit sparks, footsteps, and water effects
-- Title screen, original procedural chiptune-style ambience, vibration feedback, gamepad support, autosave, save migration, and offline/PWA cache
-- 512×480 high-density pixel-art backing canvas while preserving 256×240 gameplay coordinates
-- Temporary secret-development indicators remain enabled for testing
-
-## Controls
-
-- Move: analog touch stick / arrows / WASD / gamepad left stick
-- A: sword / confirm / talk near NPC
-- B: selected item
-- ITEM: cycle Bomb / Wind Disc once owned
-- MAP: overworld or dungeon map
-- NEW: erase save and start over
-
-## Development note
-
-The save schema intentionally remains version 17 so later visual/content releases can preserve existing progress without unnecessary save migrations. The v26 release is layered over the stable engine so visual and content improvements can continue without destabilizing save data.
+Controls: A = sword/talk; hold/release A = charged spin; B = selected item; ITEM/Q cycles B item; INV/I opens inventory; GEAR/E cycles outfits; MAP/M opens map.
