@@ -12,3 +12,29 @@ const _v36Inventory=drawInventory;
 drawInventory=function(){_v36Inventory();if(inventoryOpen){ctx.fillStyle='#a7a08d';ctx.font='5px monospace';ctx.textAlign='right';const solved=Object.keys(V36_PUZZLES).filter(puzzleSolved).length;ctx.fillText(`DUNGEON RITES ${solved}/8`,234,174)}};
 const _v36Title=drawTitle;
 drawTitle=function(){_v36Title();ctx.fillStyle='#c8a9ff';ctx.font='bold 5px monospace';ctx.textAlign='center';ctx.fillText('v36 · ITEM-DRIVEN DUNGEON RITES',128,225)};
+
+/* v36-r4 final visual override: loaded last so later graphics cannot restore bomb-style footsteps */
+(function(){
+  const prevExplosion=drawExplosion;
+  drawExplosion=function(f){
+    if(f&&f.kind==='step'){
+      if(f.biome==='water'||f.biome==='marsh'){
+        const age=f.t||0,a=Math.max(0,.34-age*.026);
+        ctx.save();ctx.globalAlpha=a;ctx.strokeStyle='#b9e8f2';ctx.lineWidth=.8;
+        ctx.beginPath();ctx.ellipse(f.x,f.y,2.5+age*.28,1+age*.10,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+      }
+      return;
+    }
+    prevExplosion(f);
+  };
+  const prevDraw=draw;
+  draw=function(){
+    prevDraw();
+    if((typeof titleOpen!=='undefined'&&titleOpen)||(typeof mapOpen!=='undefined'&&mapOpen)||(typeof inventoryOpen!=='undefined'&&inventoryOpen)||(typeof slide!=='undefined'&&slide))return;
+    ctx.save();for(const b of bombObjs)drawUnifiedBomb(b.x,b.y,b.fuse,1);ctx.restore();
+  };
+  if(typeof drawBIcon==='function'){
+    const prevBIcon=drawBIcon;
+    drawBIcon=function(cx,cy,item){if(item!=='bomb')return prevBIcon(cx,cy,item);drawUnifiedBomb(cx,cy,70,.68)};
+  }
+})();
