@@ -1,0 +1,2 @@
+const _v22Hero=drawHero;
+drawHero=function(){_v22Hero();if(!attack)return;const p=(14-attack)/14,handX=x+8+Math.cos(face)*(4+Math.sin(p*Math.PI)*3),handY=y+9+Math.sin(face)*(4+Math.sin(p*Math.PI)*3);circle(handX,handY,1.6,'#e2b785',.95);const backX=x+8-Math.cos(face)*3,backY=y+9-Math.sin(face)*3;rect(backX-1,backY-1,2,2,'#20613d')};
