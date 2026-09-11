@@ -1,12 +1,11 @@
 {
   "name": "Relic of Emberwood",
   "short_name": "Emberwood",
+  "description": "An original top-down action-adventure with a 10x10 overworld, secrets, dungeons, bosses, shops, villages, and exploration.",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
   "background_color": "#101310",
   "theme_color": "#101310",
-  "orientation": "any",
-  "description": "An original NES-style action-adventure prototype.",
+  "orientation": "landscape",
   "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
