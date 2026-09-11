@@ -1,5 +1,5 @@
-const CACHE='emberwood-v26';
-const CORE=['./','./index.html','./core.js','./state.js','./upgrade.js','./patch.js','./systems.js','./render.js','./graphics-base-1.js','./graphics-base-2.js','./graphics-base-3.js','./graphics-base-4.js','./graphics-mid-1.js','./graphics-mid-2.js','./graphics-mid-3.js','./graphics-mid-4.js','./graphics-late-1.js','./graphics-late-2.js','./manifest.json','./icon.svg'];
+const CACHE='emberwood-v34';
+const CORE=['./','./index.html','./core.js','./state.js','./upgrade.js','./systems.js','./expansion.js','./dungeonplus.js','./actionplus.js','./finaldungeon.js','./worldplus.js','./trials.js','./render.js','./graphics32.js','./graphics32plus.js','./graphics32action.js','./graphicsHD.js','./graphicsFinal.js','./graphicsPolish.js','./graphicsWorldplus.js','./graphicsTrials.js','./manifest.json','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{const copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return resp}).catch(()=>caches.match('./index.html'))))});
