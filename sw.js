@@ -1,4 +1,4 @@
-const CACHE='emberwood-v38-r1';
+const CACHE='emberwood-v38-r2';
 const CORE=['./','./index.html','./core.js','./state.js','./stateRecovery.js','./upgrade.js','./systems.js','./expansion.js','./dungeonplus.js','./actionplus.js','./finaldungeon.js','./worldplus.js','./trials.js','./adventureplus.js','./dungeonPuzzles.js','./render.js','./renderRecovery.js','./effectRecovery.js','./graphics32.js','./graphics32plus.js','./graphics32action.js','./graphicsHD.js','./graphicsFinal.js','./graphicsPolish.js','./graphicsWorldplus.js','./graphicsTrials.js','./graphicsAdventure.js','./graphicsPuzzles.js','./v37Gameplay.js','./v37Graphics.js','./v37Finalize.js','./v38Graphics.js','./manifest.json','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
