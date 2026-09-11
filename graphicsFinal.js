@@ -1,0 +1,8 @@
+/* v31 graphics: Ember Citadel + final boss */
+const _v31Color=colorForTheme;colorForTheme=function(t){if(t==='citadel')return'#e26b3e';return _v31Color(t)};
+const _v31Interior=drawInterior;
+drawInterior=function(){_v31Interior();if(!insideKey||!INTERIORS[insideKey]?.dungeon||INTERIORS[insideKey].theme!=='citadel')return;const t=performance.now()/450;rectA(18,18,220,202,'#6a2c22',.08);for(let n=0;n<8;n++){const px=25+n*29,py=42+(n%3)*52;circle(px,py,2.5,'#ff9c49',.5);circle(px,py,7+Math.sin(t+n)*2,'#e85e32',.06);rect(px-1,py+3,2,5,'#7d3d2a')}ctx.fillStyle='#f0a25f';ctx.font='bold 7px monospace';ctx.textAlign='center';ctx.fillText('EMBER CITADEL',128,31)};
+const _v31EnemyDraw=drawEnemy;
+drawEnemy=function(e){if(e.type!=='emberSovereign')return _v31EnemyDraw(e);if(e.flash&&((e.flash/2)|0)%2)return;const X=e.x-4,Y=e.y-5,t=performance.now()/100,rage=e.hp<=16;shadowBlob(e.x+7,e.y+16,18,5,.34);circle(e.x+7,e.y+7,14,rage?'#ff542e':'#e56d3c',.09);rect(X+7,Y+12,24,23,rage?'#7d2b25':'#66322a');rect(X+10,Y+5,18,13,'#b45132');rect(X+13,Y+2,12,7,'#df713c');rect(X+12,Y+15,5,5,rage?'#fff5a2':'#ffc461');rect(X+24,Y+15,5,5,rage?'#fff5a2':'#ffc461');rect(X+13,Y+27,15,6,'#351c1b');for(let n=0;n<4;n++){const a=t*.06+n*Math.PI/2;circle(e.x+7+Math.cos(a)*15,e.y+7+Math.sin(a)*15,2.2,rage?'#ffe15f':'#ff8a43',.75)}};
+const _v31Boss=drawBossBar;
+drawBossBar=function(){const e=state().enemies.find(e=>e.type==='emberSovereign'&&e.hp>0);if(!e)return _v31Boss();const w=126,bx=65,by=17;rectA(bx-3,by-3,w+6,13,'#080807',.86);rect(bx,by,w,8,'#3a2020');rect(bx+1,by+1,(w-2)*(e.hp/e.maxHp),6,e.hp<=16?'#ff5538':'#d86a39');ctx.fillStyle='#ffe2ae';ctx.font='bold 5px monospace';ctx.textAlign='center';ctx.fillText(e.hp<=16?'EMBER SOVEREIGN — RAGE':'EMBER SOVEREIGN',128,by-5)};
