@@ -1,49 +1,30 @@
-# Relic of Emberwood
+# Relic of Emberwood — v26
 
-An original NES-style top-down action-adventure prototype built as both a mobile-friendly web game and a foundation for a future NES ROM/cartridge version.
+An original top-down action-adventure inspired by the structure and feel of classic 8-bit exploration games without using copyrighted maps, sprites, music, characters, or other game assets.
 
 ## Current build
 
 - 10×10 overworld: 100 connected outdoor screens
-- Screen-to-screen scrolling transitions
-- 360-degree movement with touch, keyboard, and gamepad support
-- Directional sword thrusts and full-health sword waves
-- Shield blocking for frontal enemy projectiles
-- Bombs with animated explosions, smoke, sparks, screen shake, and phone vibration
-- Bombable cave entrances, push-stone stair entrances, keys, and locked doors
-- 3 Ember Shards plus a final Ember Shrine encounter
-- Multi-room Ancient Gate dungeon
-- Rupees, heart drops, bombs, keys, permanent Heart Vessel upgrade, and Bomb Bag upgrade
-- Supply shop with healing, bombs, and a permanent heart upgrade
-- World map that reveals visited screens and landmarks
-- Autosave using browser local storage
-- Installable/offline PWA support
-- NES-like procedural sound effects generated in the browser
+- Multiple biomes with unique palettes, animated ambience, roads, landmarks, and regional enemy mixes
+- 20 interiors, including two multi-room dungeons
+- Ancient Gate dungeon and Sunken Archive dungeon
+- Original Ember Hamlet village, NPC dialogue, shop, secrets, bomb walls, push stones, stairs, caves, locked gates, and final shrine
+- Sword combat, full-health sword wave, shield blocking, bombs, Wind Disc, keys, rupees, health upgrades, bomb capacity upgrade, and Pearl Edge sword upgrade
+- Multiple enemy archetypes plus distinct dungeon/final bosses
+- Boss health bars, telegraphed attacks, unique projectile patterns, trails, hit sparks, footsteps, and water effects
+- Title screen, original procedural chiptune-style ambience, vibration feedback, gamepad support, autosave, save migration, and offline/PWA cache
+- 512×480 high-density pixel-art backing canvas while preserving 256×240 gameplay coordinates
+- Temporary secret-development indicators remain enabled for testing
 
 ## Controls
 
-- Touch stick / Arrow keys / WASD / gamepad stick: move
-- A button / Space / Enter / gamepad A: sword
-- B button / Shift / gamepad B: place bomb
-- MAP / M / gamepad Start or Select: world or dungeon map
-- NEW: erase the current save and start over
-
-## Current progression
-
-The player starts in Ember Meadow near the center of the world. Three Ember Shards are found through a bomb-opened cave, a push-stone stair passage, and the multi-room Ancient Gate dungeon. After collecting all three, the Ember Shrine in the far northeast opens for the final encounter.
-
-Several optional secret areas contain rupees and permanent upgrades. Old roads connect many important landmarks.
+- Move: analog touch stick / arrows / WASD / gamepad left stick
+- A: sword / confirm / talk near NPC
+- B: selected item
+- ITEM: cycle Bomb / Wind Disc once owned
+- MAP: overworld or dungeon map
+- NEW: erase save and start over
 
 ## Development note
 
-The yellow `!` markers are temporary testing indicators for unopened secrets and progression gates. They are intentionally enabled during development and can be disabled when secret placement is finalized.
-
-## Code layout
-
-- `index.html` — page and mobile controls
-- `core.js` — input, sound, world generation, landmarks, portals, and dungeon definitions
-- `state.js` — movement, combat, enemies, progression, saving, shops, drops, secrets, and transitions
-- `render.js` — terrain, sprites, effects, map, dungeon, and HUD rendering
-- `manifest.json`, `sw.js`, `icon.svg` — installable/offline web-app support
-
-The game uses original names, maps, sprites, and artwork while drawing inspiration from classic NES action-adventure design.
+The save schema intentionally remains version 17 so later visual/content releases can preserve existing progress without unnecessary save migrations. The v26 release is layered over the stable engine so visual and content improvements can continue without destabilizing save data.
