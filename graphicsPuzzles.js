@@ -1,0 +1,14 @@
+/* v36 graphics: animated item seals, puzzle gates, upgraded trial presentation */
+const V36_REQ_COLOR={sword:'#efe7c2',arrow:'#f1ca55',bomb:'#e57546',disc:'#8bd8d5',fire:'#ff7447',tide:'#65cce0',moon:'#b39be2'};
+const V36_REQ_ICON={sword:'✦',arrow:'➤',bomb:'●',disc:'◌',fire:'◆',tide:'≈',moon:'☾'};
+function drawPuzzleNode(p,n,i){const X=n.x*T+8,Y=n.y*T+8,on=G.taken.has(puzzleNodeToken(p.room,i)),c=V36_REQ_COLOR[n.req]||'#ddd',t=performance.now()/300;shadowBlob(X,Y+7,13,4,.20);circle(X,Y,7,on?c:'#30342f',on?.28:.85);ctx.strokeStyle=on?c:'#807a68';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(X,Y,6+Math.sin(t+i)*.6,0,Math.PI*2);ctx.stroke();if(on){circle(X,Y,3.5,c,.7);for(let q=0;q<4;q++)circle(X+Math.cos(t+q*1.57)*9,Y+Math.sin(t+q*1.57)*9,1,c,.45)}ctx.fillStyle=on?'#fff8d6':c;ctx.font='bold 7px monospace';ctx.textAlign='center';ctx.fillText(V36_REQ_ICON[n.req]||'•',X,Y+2)}
+function puzzleGateDirection(p){for(const[d,to]of Object.entries(DUNGEON_LINKS[p.room]||{}))if(to===p.target)return d;return null}
+function drawPuzzleGate(p){if(puzzleSolved(p.room))return;const d=puzzleGateDirection(p),c=v35Theme(p.theme);if(d==='R'){rectA(238,96,18,64,'#161513',.78);for(let q=0;q<4;q++)rect(240+q*4,98,2,60,c);line(239,112,255,112,'#e5c978',1)}else if(d==='L'){rectA(0,96,18,64,'#161513',.78);for(let q=0;q<4;q++)rect(2+q*4,98,2,60,c);line(0,112,17,112,'#e5c978',1)}else if(d==='U'){rectA(96,0,64,18,'#161513',.78);for(let q=0;q<4;q++)rect(98,2+q*4,60,2,c);line(112,0,112,17,'#e5c978',1)}else if(d==='D'){rectA(96,222,64,18,'#161513',.78);for(let q=0;q<4;q++)rect(98,224+q*4,60,2,c);line(112,223,112,239,'#e5c978',1)}}
+const _v36Interior=drawInterior;
+drawInterior=function(){_v36Interior();const p=currentPuzzle();if(!p)return;for(let i=0;i<p.nodes.length;i++)drawPuzzleNode(p,p.nodes[i],i);drawPuzzleGate(p);if(!puzzleSolved(p.room)){frameBox(66,20,124,17);ctx.fillStyle=v35Theme(p.theme);ctx.font='bold 6px monospace';ctx.textAlign='center';ctx.fillText(`RUNE RITE ${puzzleCount(p)}/${p.nodes.length}`,128,31)}};
+const _v36Map=drawMapOverlay;
+drawMapOverlay=function(){_v36Map();if(!mapOpen||!insideKey)return;const p=V36_PUZZLES[insideKey];if(p){ctx.fillStyle=puzzleSolved(p.room)?'#8ed78e':'#e2bd6d';ctx.font='bold 6px monospace';ctx.textAlign='center';ctx.fillText(puzzleSolved(p.room)?'BOSS RITE COMPLETE':`BOSS RITE ${puzzleCount(p)}/${p.nodes.length}`,128,199)}};
+const _v36Inventory=drawInventory;
+drawInventory=function(){_v36Inventory();if(inventoryOpen){ctx.fillStyle='#a7a08d';ctx.font='5px monospace';ctx.textAlign='right';const solved=Object.keys(V36_PUZZLES).filter(puzzleSolved).length;ctx.fillText(`DUNGEON RITES ${solved}/8`,234,174)}};
+const _v36Title=drawTitle;
+drawTitle=function(){_v36Title();ctx.fillStyle='#c8a9ff';ctx.font='bold 5px monospace';ctx.textAlign='center';ctx.fillText('v36 · ITEM-DRIVEN DUNGEON RITES',128,225)};
