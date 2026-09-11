@@ -9,5 +9,10 @@ if(!document.querySelector('script[data-emberwood-v38]')){
   const v38=document.createElement('script');
   v38.src='v38Graphics.js?v=38r1';
   v38.dataset.emberwoodV38='1';
+  v38.onload=()=>{
+    C.style.imageRendering='auto';
+    document.title='Relic of Emberwood v38 — Illustrated Edition';
+    if(typeof HELP!=='undefined')HELP.textContent='v38 Illustrated Edition · smooth painted-style rendering · v37 labyrinth gameplay preserved';
+  };
   document.body.appendChild(v38);
 }
