@@ -1,0 +1,6 @@
+/* v34 graphics: rune trials and boss-gate feedback */
+function isTrialRoom(k){for(const a of Object.values(DUNGEON_TRIALS))if(a.includes(k))return true;return false}
+const _v34Interior=drawInterior;
+drawInterior=function(){_v34Interior();if(!insideKey||!INTERIORS[insideKey]?.dungeon)return;if(isTrialRoom(insideKey)){const done=G.interiorStates[insideKey]?.cleared,col=colorForTheme(INTERIORS[insideKey].theme);for(let n=0;n<3;n++){const px=96+n*32,py=111;circle(px,py,8,done?col:'#403a38',.18);ctx.strokeStyle=done?col:'#7c6a57';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);ctx.stroke();line(px-3,py,px+3,py,done?'#f3e8bd':'#9a8166',1);line(px,py-3,px,py+3,done?'#f3e8bd':'#9a8166',1)}ctx.fillStyle=done?'#d6e8c4':'#baa88a';ctx.font='5px monospace';ctx.textAlign='center';ctx.fillText(done?'RUNE AWAKENED':'DEFEAT THE GUARDIANS',128,129)}};
+const _v34Map=drawGenericDungeonMap;
+drawGenericDungeonMap=function(){const ok=_v34Map();if(!ok)return ok;const def=DUNGEON_INFO[insideKey];if(def){const keys=Object.keys(DUNGEON_INFO).filter(k=>DUNGEON_INFO[k]===def),trials=keys.filter(isTrialRoom),done=trials.filter(k=>G.interiorStates[k]?.cleared).length;if(trials.length){ctx.fillStyle='#d7bf72';ctx.font='6px monospace';ctx.textAlign='center';ctx.fillText(`RUNE TRIALS ${done}/${trials.length}`,128,197)}}return true};
