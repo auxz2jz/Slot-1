@@ -1,4 +1,4 @@
-# Relic of Emberwood — Adventure Edition v35
+# Relic of Emberwood — Dungeon Rites Edition v36
 
 Original long-form top-down action adventure.
 
@@ -7,6 +7,7 @@ Original long-form top-down action adventure.
 - Eight Ember Shards required for the final Ember Citadel
 - Seven major pre-final dungeons plus the eight-room final Citadel
 - Small keys, Master Key, dungeon clear gates and rune trials
+- Eight item-driven boss-wing rites using the sword, Tide Tunic, Sun Bow, bombs, Wind Disc, Ember Rod, Moon Ring, and a mixed final Citadel rite
 - Dungeon-specific Maps and Compasses earned from sealed treasure chests
 - 24 dungeon treasure rooms plus eight hidden overworld Heart Fragment chests
 - Eight themed miniboss guardians protecting major dungeon upgrades
@@ -19,6 +20,7 @@ Original long-form top-down action adventure.
 - Boss-specific attack patterns and a multi-phase final boss
 - Progressive dungeon maps: explored rooms first, full layout after finding the Map, boss/treasure markers after finding the Compass
 - Eight Heart Fragments can form two additional maximum-heart upgrades
+- Fixed legacy malformed spike entries in a few Storm/Moon rooms and corrected the final Citadel trial gate to its real boss connection
 - 768×720 backing canvas with embedded/procedural 48-pixel source sprite atlas for denser 16/32-bit-era art
 - Keyboard, phone controls, gamepad, autosave and offline/PWA support
 
