@@ -1,7 +1,7 @@
 {
-  "name": "Relic of Emberwood",
+  "name": "Relic of Emberwood — Expanded Edition",
   "short_name": "Emberwood",
-  "description": "An original top-down action-adventure with a 10x10 overworld, secrets, dungeons, bosses, shops, villages, and exploration.",
+  "description": "A long-form original top-down action adventure with a 10x10 overworld, deep multi-room dungeons, equipment, magic, bosses, secrets, shops, villages, and an eight-shard final quest.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#101310",
