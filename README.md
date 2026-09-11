@@ -1,4 +1,4 @@
-# Relic of Emberwood — Expanded Edition v34
+# Relic of Emberwood — Adventure Edition v35
 
 Original long-form top-down action adventure.
 
@@ -7,13 +7,19 @@ Original long-form top-down action adventure.
 - Eight Ember Shards required for the final Ember Citadel
 - Seven major pre-final dungeons plus the eight-room final Citadel
 - Small keys, Master Key, dungeon clear gates and rune trials
+- Dungeon-specific Maps and Compasses earned from sealed treasure chests
+- 24 dungeon treasure rooms plus eight hidden overworld Heart Fragment chests
+- Eight themed miniboss guardians protecting major dungeon upgrades
+- Three persistent Ember Hamlet side quests with Sage Charm, Hunter Ring and Village Satchel rewards
 - Bombs (round, timed, and dangerous to the hero), Wind Disc, Sun Bow, Ember Rod
 - Magic meter, Mirror Shield, Storm Boots, Pearl Edge
-- Verdant/Guardian/Moon Rings
+- Verdant/Guardian/Moon/Hunter Rings
 - Traveler, Tide, Ember and Shadow outfits with gameplay effects
-- Breakable pots, cuttable grass, spikes, pillars, secrets and shops
+- Breakable pots, cuttable grass, spikes, pillars, secrets, shops and treasure chests
 - Boss-specific attack patterns and a multi-phase final boss
-- 768×720 backing canvas with embedded 48-pixel source sprite atlas for denser 16/32-bit-era art
+- Progressive dungeon maps: explored rooms first, full layout after finding the Map, boss/treasure markers after finding the Compass
+- Eight Heart Fragments can form two additional maximum-heart upgrades
+- 768×720 backing canvas with embedded/procedural 48-pixel source sprite atlas for denser 16/32-bit-era art
 - Keyboard, phone controls, gamepad, autosave and offline/PWA support
 
-Controls: A = sword/talk; hold/release A = charged spin; B = selected item; ITEM/Q cycles B item; INV/I opens inventory; GEAR/E cycles outfits; MAP/M opens map.
+Controls: A = sword/talk/open chest; hold/release A = charged spin; B = selected item; ITEM/Q cycles B item; INV/I opens inventory and quest status; GEAR/E cycles outfits; MAP/M opens map.
