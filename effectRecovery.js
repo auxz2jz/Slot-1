@@ -1,24 +1,34 @@
-/* v36-r3: render movement/combat effects separately from bomb explosions */
-const _effectBombExplosion=drawExplosion;
+/* v36-r4 visual hotfix: footsteps never use bomb visuals; bombs share one round design */
+const _r4Explosion=drawExplosion;
 drawExplosion=function(f){
   if(f&&f.kind==='step'){
-    const age=f.t||0;
-    if(f.biome==='water'){
-      ctx.save();ctx.globalAlpha=Math.max(0,.32-age*.025);ctx.strokeStyle='#b9e8f2';ctx.lineWidth=.7;ctx.beginPath();ctx.ellipse(f.x,f.y,3+age*.28,1.2+age*.10,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-    }else{
-      const a=Math.max(0,.30-age*.028);circle(f.x-2,f.y,1.1,'#d5c6a0',a);circle(f.x+2,f.y+.5,.9,'#b9aa86',a*.8);
+    if(f.biome==='water'||f.biome==='marsh'){
+      const age=f.t||0,a=Math.max(0,.34-age*.026);
+      ctx.save();ctx.globalAlpha=a;ctx.strokeStyle='#b9e8f2';ctx.lineWidth=.8;
+      ctx.beginPath();ctx.ellipse(f.x,f.y,2.5+age*.28,1+age*.10,0,0,Math.PI*2);ctx.stroke();ctx.restore();
     }
     return;
   }
-  if(f&&f.kind==='hitSpark'){
-    const age=f.t||0,a=Math.max(0,.9-age*.09),r=2+age*.7;for(let i=0;i<4;i++){const an=i*Math.PI/2;line(f.x+Math.cos(an)*1.5,f.y+Math.sin(an)*1.5,f.x+Math.cos(an)*r,f.y+Math.sin(an)*r,'#fff0a0',1,a)}return;
-  }
-  if(f&&f.kind==='spark'){
-    const age=f.t||0,a=Math.max(0,.8-age*.07);for(let i=0;i<5;i++){const an=i*1.257+age*.12;circle(f.x+Math.cos(an)*(3+age*.35),f.y+Math.sin(an)*(3+age*.35),1,'#ffe5a0',a)}return;
-  }
-  if(f&&f.kind==='burst'){
-    const age=f.t||0,a=Math.max(0,.65-age*.055);for(let i=0;i<7;i++){const an=i*.897;circle(f.x+Math.cos(an)*(2+age*.6),f.y+Math.sin(an)*(2+age*.6),1.2,'#d8e0cf',a)}return;
-  }
-  if(f&&f.kind){return;}
-  _effectBombExplosion(f);
+  _r4Explosion(f);
 };
+function drawUnifiedBomb(cx,cy,fuse=70,scale=1){
+  const flash=fuse<20&&((fuse/3)|0)%2;
+  circle(cx,cy,9*scale,'#15171b',1);
+  circle(cx,cy,6.7*scale,flash?'#a33d43':'#22262c',1);
+  circle(cx-2*scale,cy-2*scale,2*scale,'#6d7681',.48);
+  line(cx+2*scale,cy-5*scale,cx+5*scale,cy-9*scale,'#8d6740',Math.max(1,1.4*scale),1);
+  circle(cx+5.5*scale,cy-9.5*scale,1.4*scale,flash?'#ff9a3d':'#e7c86e',.95);
+}
+const _r4Draw=draw;
+draw=function(){
+  _r4Draw();
+  if(typeof titleOpen!=='undefined'&&titleOpen)return;
+  if(typeof mapOpen!=='undefined'&&mapOpen)return;
+  if(typeof inventoryOpen!=='undefined'&&inventoryOpen)return;
+  if(typeof slide!=='undefined'&&slide)return;
+  ctx.save();for(const b of bombObjs)drawUnifiedBomb(b.x,b.y,b.fuse,1);ctx.restore();
+};
+if(typeof drawBIcon==='function'){
+  const _r4BIcon=drawBIcon;
+  drawBIcon=function(cx,cy,item){if(item!=='bomb')return _r4BIcon(cx,cy,item);drawUnifiedBomb(cx,cy,70,.68)};
+}
