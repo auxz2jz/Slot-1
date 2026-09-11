@@ -1,4 +1,4 @@
-const CACHE='emberwood-v34';
+const CACHE='emberwood-v34-r1';
 const CORE=['./','./index.html','./core.js','./state.js','./upgrade.js','./systems.js','./expansion.js','./dungeonplus.js','./actionplus.js','./finaldungeon.js','./worldplus.js','./trials.js','./render.js','./graphics32.js','./graphics32plus.js','./graphics32action.js','./graphicsHD.js','./graphicsFinal.js','./graphicsPolish.js','./graphicsWorldplus.js','./graphicsTrials.js','./manifest.json','./icon.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
