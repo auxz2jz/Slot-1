@@ -1,0 +1,56 @@
+name: Build Relic of Emberwood N64 ROM
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'n64/**'
+      - '.github/workflows/build-n64.yml'
+      - 'Makefile'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-rom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Emberwood
+        uses: actions/checkout@v6
+
+      - name: Pull official libdragon toolchain image
+        run: docker pull ghcr.io/dragonminded/libdragon:latest
+
+      - name: Build preview libdragon, Tiny3D, and ROM
+        run: |
+          docker run --rm \
+            -v "$PWD:/work" \
+            -w /work \
+            ghcr.io/dragonminded/libdragon:latest \
+            bash -lc '
+              set -euxo pipefail
+              git clone --depth 1 --branch preview https://github.com/DragonMinded/libdragon.git /tmp/libdragon
+              cd /tmp/libdragon
+              ./build.sh --no-examples
+              git clone --depth 1 https://github.com/HailToDodongo/tiny3d.git /tmp/tiny3d
+              cd /tmp/tiny3d
+              make -j4
+              make install
+              cd /work/n64
+              make T3D_INST=/tmp/tiny3d
+            '
+
+      - name: Verify ROM
+        run: |
+          test -s n64/relic_emberwood.z64
+          file n64/relic_emberwood.z64
+          sha256sum n64/relic_emberwood.z64
+
+      - name: Upload emulator-ready ROM
+        uses: actions/upload-artifact@v4
+        with:
+          name: Relic-of-Emberwood-N64
+          path: n64/relic_emberwood.z64
+          if-no-files-found: error
+          retention-days: 30
