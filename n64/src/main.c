@@ -95,17 +95,17 @@ static int draw_cursor = 0;
 static T3DViewport viewport;
 
 static const uint32_t MAT_RGBA[MAT_COUNT] = {
-    RGBA32(75, 118, 58, 255),
-    RGBA32(151, 119, 76, 255),
-    RGBA32(54, 111, 55, 255),
-    RGBA32(34, 74, 39, 255),
-    RGBA32(224, 166, 112, 255),
-    RGBA32(126, 76, 35, 255),
-    RGBA32(110, 70, 39, 255),
-    RGBA32(67, 42, 28, 255),
-    RGBA32(201, 201, 184, 255),
-    RGBA32(189, 155, 75, 255),
-    RGBA32(135, 57, 48, 255)
+    0x4B763AFFu,
+    0x97774CFFu,
+    0x366F37FFu,
+    0x224A27FFu,
+    0xE0A670FFu,
+    0x7E4C23FFu,
+    0x6E4627FFu,
+    0x432A1CFFu,
+    0xC9C9B8FFu,
+    0xBD9B4BFFu,
+    0x873930FFu
 };
 
 static const CircleObstacle tree_obs[] = {
