@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-rom:
@@ -18,6 +18,36 @@ jobs:
     steps:
       - name: Checkout Emberwood
         uses: actions/checkout@v6
+
+      - name: Normalize packed vertex colors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('n64/src/main.c')
+          s = p.read_text()
+          repl = {
+              'RGBA32(75, 118, 58, 255)': '0x4B763AFFu',
+              'RGBA32(151, 119, 76, 255)': '0x97774CFFu',
+              'RGBA32(54, 111, 55, 255)': '0x366F37FFu',
+              'RGBA32(34, 74, 39, 255)': '0x224A27FFu',
+              'RGBA32(224, 166, 112, 255)': '0xE0A670FFu',
+              'RGBA32(126, 76, 35, 255)': '0x7E4C23FFu',
+              'RGBA32(110, 70, 39, 255)': '0x6E4627FFu',
+              'RGBA32(67, 42, 28, 255)': '0x432A1CFFu',
+              'RGBA32(201, 201, 184, 255)': '0xC9C9B8FFu',
+              'RGBA32(189, 155, 75, 255)': '0xBD9B4BFFu',
+              'RGBA32(135, 57, 48, 255)': '0x873930FFu',
+          }
+          for a,b in repl.items(): s=s.replace(a,b)
+          p.write_text(s)
+          PY
+          if ! git diff --quiet -- n64/src/main.c; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add n64/src/main.c
+            git commit -m "Fix packed N64 vertex colors"
+            git push
+          fi
 
       - name: Pull official libdragon toolchain image
         run: docker pull ghcr.io/dragonminded/libdragon:latest
@@ -38,21 +68,6 @@ jobs:
               make -j4
               make install
               cd /work/n64
-              # Temporary compile probe: current libdragon RGBA32 returns color_t,
-              # while Tiny3D packed vertices store raw 0xRRGGBBAA values.
-              sed -i \
-                -e "s/RGBA32(75, 118, 58, 255)/0x4B763AFFu/" \
-                -e "s/RGBA32(151, 119, 76, 255)/0x97774CFFu/" \
-                -e "s/RGBA32(54, 111, 55, 255)/0x366F37FFu/" \
-                -e "s/RGBA32(34, 74, 39, 255)/0x224A27FFu/" \
-                -e "s/RGBA32(224, 166, 112, 255)/0xE0A670FFu/" \
-                -e "s/RGBA32(126, 76, 35, 255)/0x7E4C23FFu/" \
-                -e "s/RGBA32(110, 70, 39, 255)/0x6E4627FFu/" \
-                -e "s/RGBA32(67, 42, 28, 255)/0x432A1CFFu/" \
-                -e "s/RGBA32(201, 201, 184, 255)/0xC9C9B8FFu/" \
-                -e "s/RGBA32(189, 155, 75, 255)/0xBD9B4BFFu/" \
-                -e "s/RGBA32(135, 57, 48, 255)/0x873930FFu/" \
-                src/main.c
               make T3D_INST=/tmp/tiny3d
             '
 
