@@ -19,7 +19,8 @@ static const RoadEdge roads[] = {
     {74,84},{84,85},{85,86},{86,87},{87,88},
     {54,53},{53,52},{52,42},{42,32},{32,31},
     {52,51},{51,50},{50,40},
-    {44,34},{34,24},{24,14},{14,13},{13,12}
+    {34,24},{24,14},{14,13},{13,12},
+    {53,43},{43,44},{43,33}
 };
 
 static EmberBiome biome_for(uint8_t id) {
@@ -51,12 +52,13 @@ static const char *special_title(uint8_t id) {
     switch(id) {
         case 9:return "Ember Shrine"; case 12:return "Whispering Bluff";
         case 22:return "Wayfarer Crossroads"; case 31:return "Mossy Hollow";
-        case 40:return "Reedwind Bank"; case 44:return "Whisper Ridge";
-        case 45:return "Pinewatch"; case 46:return "Bluewater";
-        case 54:return "Ember Meadow"; case 55:return "Old Stone Road";
-        case 56:return "Amber Ruins"; case 64:return "South Grove";
-        case 65:return "Grave Path"; case 66:return "Ancient Gate";
-        case 73:return "Cinder Hollow"; case 88:return "Old Barrow Field";
+        case 40:return "Reedwind Bank"; case 43:return "Ember Hamlet";
+        case 44:return "Whisper Ridge"; case 45:return "Pinewatch";
+        case 46:return "Bluewater"; case 54:return "Ember Meadow";
+        case 55:return "Old Stone Road"; case 56:return "Amber Ruins";
+        case 64:return "South Grove"; case 65:return "Grave Path";
+        case 66:return "Ancient Gate"; case 73:return "Cinder Hollow";
+        case 88:return "Old Barrow Field";
         default:return NULL;
     }
 }
@@ -65,10 +67,11 @@ static EmberLandmark landmark_for(uint8_t id) {
     switch(id) {
         case 9:return EMBER_LANDMARK_SHRINE; case 12:return EMBER_LANDMARK_CACHE;
         case 22:return EMBER_LANDMARK_SHOP; case 31:return EMBER_LANDMARK_HEART;
-        case 40:return EMBER_LANDMARK_WIND_DISC; case 46:return EMBER_LANDMARK_SUNKEN_ARCHIVE;
-        case 55:return EMBER_LANDMARK_CAVE; case 56:return EMBER_LANDMARK_STAIRS;
-        case 65:return EMBER_LANDMARK_KEY; case 66:return EMBER_LANDMARK_GATE;
-        case 73:return EMBER_LANDMARK_BOMB_BAG; case 88:return EMBER_LANDMARK_BARROW;
+        case 40:return EMBER_LANDMARK_WIND_DISC; case 43:return EMBER_LANDMARK_VILLAGE;
+        case 46:return EMBER_LANDMARK_SUNKEN_ARCHIVE; case 55:return EMBER_LANDMARK_CAVE;
+        case 56:return EMBER_LANDMARK_STAIRS; case 65:return EMBER_LANDMARK_KEY;
+        case 66:return EMBER_LANDMARK_GATE; case 73:return EMBER_LANDMARK_BOMB_BAG;
+        case 88:return EMBER_LANDMARK_BARROW;
         default:return EMBER_LANDMARK_NONE;
     }
 }
@@ -98,6 +101,6 @@ const char *ember_world_biome_name(EmberBiome b) {
     return (unsigned)b<8?names[b]:"Field";
 }
 const char *ember_world_landmark_name(EmberLandmark l) {
-    static const char *const names[]={"","Shrine","Cache","Shop","Heart","Cave","Stairs","Key","Gate","Bomb Bag","Barrow","Wind Disc","Sunken Archive"};
-    return (unsigned)l<13?names[l]:"";
+    static const char *const names[]={"","Shrine","Cache","Shop","Heart","Cave","Stairs","Key","Gate","Bomb Bag","Barrow","Wind Disc","Sunken Archive","Village"};
+    return (unsigned)l<14?names[l]:"";
 }
