@@ -3,6 +3,7 @@
 #include "world.h"
 #include "game_state.h"
 #include "dungeons.h"
+#include "interiors.h"
 
 /*
  * Runtime bridge for the existing tested first-milestone arena.
@@ -34,6 +35,16 @@ static const EmberDungeonDef *runtime_dungeon_at_screen(uint8_t screen_id) {
         if(d && d->entrance_screen==screen_id) return d;
     }
     return NULL;
+}
+
+static const char *runtime_entry_method_name(EmberEntryMethod method) {
+    switch(method) {
+        case EMBER_ENTRY_KEY:return "KEY";
+        case EMBER_ENTRY_BOMB:return "BOMB";
+        case EMBER_ENTRY_PUSH:return "PUSH";
+        case EMBER_ENTRY_SHARDS:return "8 SHARDS";
+        default:return "OPEN";
+    }
 }
 
 static void runtime_spawn_screen_enemy(void) {
@@ -164,12 +175,13 @@ static rdpq_textmetrics_t ember_runtime_text_printf(
             ember_world_biome_name(runtime_screen.biome));
 
         const EmberDungeonDef *d=runtime_dungeon_at_screen(runtime_state.screen_id);
+        const EmberInteriorDef *inside=ember_interior_at_screen(runtime_state.screen_id,false);
         if(d) {
-            const char *gate=d->entry_method==EMBER_ENTRY_KEY?"KEY":
-                d->entry_method==EMBER_ENTRY_BOMB?"BOMB":
-                d->entry_method==EMBER_ENTRY_PUSH?"PUSH":
-                d->entry_method==EMBER_ENTRY_SHARDS?"8 SHARDS":"OPEN";
-            rdpq_text_printf(NULL,font_id,8,32,"%s  entrance: %s",d->name,gate);
+            rdpq_text_printf(NULL,font_id,8,32,"%s  entrance: %s",
+                d->name,runtime_entry_method_name(d->entry_method));
+        } else if(inside) {
+            rdpq_text_printf(NULL,font_id,8,32,"%s  entrance: %s",
+                inside->name,runtime_entry_method_name(inside->entry_method));
         } else if(runtime_screen.landmark!=EMBER_LANDMARK_NONE) {
             rdpq_text_printf(NULL,font_id,8,32,"Landmark: %s",
                 ember_world_landmark_name(runtime_screen.landmark));
