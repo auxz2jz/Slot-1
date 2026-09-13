@@ -7,7 +7,7 @@ include $(T3D_INST)/t3d.mk
 N64_CFLAGS += -std=gnu11 -O2 -Wall -Wextra
 N64_LDFLAGS += -lm
 
-SRC = src/main.c src/world.c src/game_state.c
+SRC = src/main.c src/world.c src/game_state.c src/dungeons.c
 OBJS = $(SRC:%.c=$(BUILD_DIR)/%.o)
 
 all: relic_emberwood.z64
