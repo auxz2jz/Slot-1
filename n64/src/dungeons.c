@@ -166,7 +166,7 @@ bool ember_dungeon_trials_cleared(EmberDungeonId id, uint16_t cleared_mask) {
 const char *ember_reward_name(EmberReward reward) {
     static const char *const names[] = {
         "","Ember Shard","Small Key","Sun Bow","Verdant Ring","Master Key",
-        "Storm Boots","Mirror Shield","Ember Outfit","Ember Rod","Moon Ring",
+        "Storm Boots","Mirror Shield","Ember Rod","Ember Outfit","Moon Ring",
         "Shadow Outfit","Guardian Ring","Tide Outfit","Pearl Edge","Magic Vessel","Ember Relic"
     };
     return (unsigned)reward < (sizeof(names)/sizeof(names[0])) ? names[reward] : "";
